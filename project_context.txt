@@ -1492,9 +1492,9 @@ export default RegisterForm;
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useConfig } from '../../contexts/ConfigContext';
-import { 
-    Search, 
-    X, 
+import {
+    Search,
+    X,
     Filter,
     BookOpen,
     User,
@@ -1591,7 +1591,7 @@ const AdvancedSearchBar: React.FC<AdvancedSearchBarProps> = ({
                 isFocused ? 'ring-2 ring-opacity-50' : ''
             }`} style={{ ringColor: `${primaryColor}50` }}>
                 <Search className="w-5 h-5 text-gray-400 mr-3 flex-shrink-0" />
-                
+
                 <input
                     type="text"
                     placeholder={placeholder}
@@ -1721,7 +1721,7 @@ const AdvancedSearchBar: React.FC<AdvancedSearchBarProps> = ({
                                 <span className="text-xs text-gray-500">
                                     Filtres actifs : {[filters.author, filters.publisher, filters.category, filters.yearFrom, filters.yearTo].filter(Boolean).length}
                                 </span>
-                                
+
                                 <button
                                     onClick={() => {
                                         setFilters(prev => ({
@@ -8465,7 +8465,7 @@ const Footer = () => {
                             </li>
                             <li>
                                 <a
-                                    href="/dashboard/reservations"
+                                    href="/dashboard/emprunts"
                                     className="text-gray-300 transition-colors"
                                     onMouseEnter={(e) => e.currentTarget.style.color = primaryColor}
                                     onMouseLeave={(e) => e.currentTarget.style.color = '#d1d5db'}
@@ -8929,7 +8929,7 @@ const Header: React.FC = () => {
                                         </NavLink>
 
                                         <NavLink
-                                            to="/dashboard/reservations"
+                                            to="/dashboard/emprunts"
                                             className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
                                             onClick={() => setShowUserMenu(false)}
                                         >
@@ -9113,13 +9113,13 @@ export default Header;
 
 //Sidebar.jsx
 import { NavLink } from 'react-router-dom';
-import { 
-  User, 
-  Calendar, 
-  ShoppingCart, 
-  MessageCircle, 
-  History, 
-  Bell, 
+import {
+  User,
+  Calendar,
+  ShoppingCart,
+  MessageCircle,
+  History,
+  Bell,
   LogOut,
   ChevronLeft,
   ChevronRight
@@ -9128,42 +9128,42 @@ import SidebarItem from './SidebarItem';
 
 const Sidebar = ({ collapsed, toggleSidebar }) => {
   const menuItems = [
-    { 
-      path: '/dashboard/profile', 
-      name: 'Profil', 
-      icon: <User /> 
+    {
+      path: '/dashboard/profile',
+      name: 'Profil',
+      icon: <User />
     },
-    { 
-      path: '/dashboard/dashboard/cart', 
-      name: ' Réservations', 
-      icon: <Calendar /> 
+    {
+      path: '/dashboard/dashboard/cart',
+      name: ' Réservations',
+      icon: <Calendar />
     },
-    { 
-      path: '/dashboard/cart', 
-      name: ' Panier', 
-      icon: <ShoppingCart /> 
+    {
+      path: '/dashboard/cart',
+      name: ' Panier',
+      icon: <ShoppingCart />
     },
-    { 
-      path: '/dashboard/chat', 
-      name: 'Chat', 
-      icon: <MessageCircle /> 
+    {
+      path: '/dashboard/chat',
+      name: 'Chat',
+      icon: <MessageCircle />
     },
-    { 
-      path: '/dashboard/history', 
-      name: 'Historique', 
-      icon: <History /> 
+    {
+      path: '/dashboard/history',
+      name: 'Historique',
+      icon: <History />
     },
-    { 
-      path: '/dashboard/notifications', 
-      name: 'Notifications', 
-      icon: <Bell /> 
+    {
+      path: '/dashboard/notifications',
+      name: 'Notifications',
+      icon: <Bell />
     }
   ];
 
   return (
-    <div 
+    <div
       className="fixed h-full bg-white shadow-lg transition-all duration-300 z-10"
-      style={{ 
+      style={{
         width: collapsed ? 'var(--sidebar-collapsed-width)' : 'var(--sidebar-width)',
       }}
     >
@@ -9173,7 +9173,7 @@ const Sidebar = ({ collapsed, toggleSidebar }) => {
             BiblioENSPY
           </div>
         )}
-        <button 
+        <button
           onClick={toggleSidebar}
           className="p-2 rounded-full hover:bg-gray-100 focus:outline-none"
           style={{ color: 'var(--primary-color)' }}
@@ -9186,10 +9186,10 @@ const Sidebar = ({ collapsed, toggleSidebar }) => {
         <nav>
           <ul>
             {menuItems.map((item, index) => (
-              <SidebarItem 
-                key={index} 
-                item={item} 
-                collapsed={collapsed} 
+              <SidebarItem
+                key={index}
+                item={item}
+                collapsed={collapsed}
               />
             ))}
           </ul>
@@ -9197,11 +9197,11 @@ const Sidebar = ({ collapsed, toggleSidebar }) => {
       </div>
 
       <div className="absolute bottom-0 w-full border-t p-4">
-        <NavLink 
-          to="/logout" 
+        <NavLink
+          to="/logout"
           className={`flex items-center rounded-md p-2 transition-colors hover:bg-gray-100`}
         >
-          <div 
+          <div
             className="flex items-center justify-center"
             style={{ color: 'var(--primary-color)' }}
           >
@@ -9227,14 +9227,14 @@ import { NavLink } from 'react-router-dom';
 const SidebarItem = ({ item, collapsed }) => {
   return (
     <li className="mb-1 px-2">
-      <NavLink 
-        to={item.path} 
+      <NavLink
+        to={item.path}
         className={({ isActive }) => `
           flex items-center rounded-md p-2 transition-colors
           ${isActive ? 'bg-gray-100 font-medium' : 'hover:bg-gray-100'}
         `}
       >
-        <div 
+        <div
           className="flex items-center justify-center"
           style={{ color: 'var(--primary-color)' }}
         >
@@ -9264,12 +9264,12 @@ const SimilarBooks = ({ books }) => {
     const container = document.getElementById('similar-books-container');
     const scrollAmount = direction === 'left' ? -320 : 320;
     const newPosition = scrollPosition + scrollAmount;
-    
+
     container.scrollTo({
       left: newPosition,
       behavior: 'smooth'
     });
-    
+
     setScrollPosition(newPosition);
   };
 
@@ -9280,13 +9280,13 @@ const SimilarBooks = ({ books }) => {
           <span className="border-b-4 border-primary pb-1">Vous pourriez aussi aimer</span>
         </h2>
         <div className="flex space-x-2">
-          <button 
+          <button
             onClick={() => scroll('left')}
             className="p-2 rounded-full bg-white hover:bg-primary hover:text-white transition-colors shadow"
           >
             <ChevronLeft size={20} />
           </button>
-          <button 
+          <button
             onClick={() => scroll('right')}
             className="p-2 rounded-full bg-white hover:bg-primary hover:text-white transition-colors shadow"
           >
@@ -9294,8 +9294,8 @@ const SimilarBooks = ({ books }) => {
           </button>
         </div>
       </div>
-      
-      <div 
+
+      <div
         id="similar-books-container"
         className="flex gap-6 overflow-x-auto hide-scrollbar pb-4"
         style={{ scrollBehavior: 'smooth' }}
@@ -12135,7 +12135,7 @@ export const useConfig = (): ConfigContextType => {
 
 //---> PATH: /c/Users/ELEONOR BJOUNKENG/Desktop/web-biblio-client/src/contexts/readme.md
 
-#### dans ce dossier nous allons definir les context 
+#### dans ce dossier nous allons definir les context
 ├── contexts/            # Contextes React
 │   │   ├── AuthContext.jsx  # Contexte pour l'authentification
 │   │   └── ThemeContext.jsx # Contexte pour le thème dark/light// END OF FILE: src/contexts/readme.md
@@ -12153,13 +12153,13 @@ export const useConfig = (): ConfigContextType => {
 // src/layouts/DashboardLayout.tsx
 import { useState, useEffect } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
-import { 
-  User, 
-  Calendar, 
-  ShoppingCart, 
-  MessageCircle, 
-  Clock, 
-  Bell, 
+import {
+  User,
+  Calendar,
+  ShoppingCart,
+  MessageCircle,
+  Clock,
+  Bell,
   LogOut,
   ChevronLeft,
   ChevronRight,
@@ -12209,52 +12209,52 @@ const DashboardLayout = () => {
   };
 
   const menuItems: MenuItem[] = [
-    
-    { 
-      path: '/dashboard/profile', 
-      name: ' Profil', 
-      icon: <User size={20} /> 
+
+    {
+      path: '/dashboard/profile',
+      name: ' Profil',
+      icon: <User size={20} />
     },
-    { 
-      path: '/dashboard/reservations', 
-      name: ' Réservations', 
-      icon: <Calendar size={20} /> 
+    {
+      path: '/dashboard/emprunts',
+      name: ' Réservations',
+      icon: <Calendar size={20} />
     },
-    { 
-      path: '/dashboard/cart', 
-      name: ' Panier', 
-      icon: <ShoppingCart size={20} /> 
+    {
+      path: '/dashboard/cart',
+      name: ' Panier',
+      icon: <ShoppingCart size={20} />
     },
-    { 
-      path: '/dashboard/chat', 
-      name: 'Chat', 
-      icon: <MessageCircle size={20} /> 
+    {
+      path: '/dashboard/chat',
+      name: 'Chat',
+      icon: <MessageCircle size={20} />
     },
-    { 
-        path: '/dashboard/statistics', 
-        name: 'Statistics', 
-        icon: <PieChart size={20} /> 
+    {
+        path: '/dashboard/statistics',
+        name: 'Statistics',
+        icon: <PieChart size={20} />
     },
-    { 
-      path: '/dashboard/history', 
-      name: 'Historique', 
-      icon: <Clock size={20} /> 
+    {
+      path: '/dashboard/history',
+      name: 'Historique',
+      icon: <Clock size={20} />
     },
-    { 
-      path: '/dashboard/notifications', 
-      name: 'Notifications', 
-      icon: <Bell size={20} /> 
+    {
+      path: '/dashboard/notifications',
+      name: 'Notifications',
+      icon: <Bell size={20} />
     }
   ];
 
   return (
     <div className="flex h-screen overflow-hidden bg-gray-100">
       {/* Sidebar */}
-      <aside 
+      <aside
         className={`fixed md:relative h-full transition-all duration-300 z-20 shadow-xl ${
           isMobile && !collapsed ? 'translate-x-0' : isMobile && collapsed ? '-translate-x-full' : 'translate-x-0'
         }`}
-        style={{ 
+        style={{
           width: collapsed ? '80px' : '260px',
           backgroundColor: COLORS.secondary,
         }}
@@ -12270,12 +12270,12 @@ const DashboardLayout = () => {
           {collapsed && (
             <BookOpen size={28} color={COLORS.primary} className="mx-auto" />
           )}
-          <button 
+          <button
             onClick={toggleSidebar}
-            className={`absolute ${collapsed ? 'right-0 top-1/2 -translate-y-1/2 -mr-3' : 'right-4 top-1/2 -translate-y-1/2'} 
-                      p-1 rounded-full bg-white hover:bg-gray-100 focus:outline-none 
+            className={`absolute ${collapsed ? 'right-0 top-1/2 -translate-y-1/2 -mr-3' : 'right-4 top-1/2 -translate-y-1/2'}
+                      p-1 rounded-full bg-white hover:bg-gray-100 focus:outline-none
                       shadow-md transition-transform duration-300 z-30`}
-            style={{ 
+            style={{
               color: COLORS.primary,
               transform: collapsed ? 'rotate(0deg)' : 'rotate(180deg)'
             }}
@@ -12285,25 +12285,25 @@ const DashboardLayout = () => {
         </div>
 
         {/* Profil utilisateur */}
-        <div 
+        <div
           className={`relative px-4 py-5 border-b border-opacity-20`}
           style={{ borderColor: 'rgba(255, 255, 255, 0.2)' }}
         >
           <div className="flex items-center">
             <div className="relative">
               <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-300 border-2 border-white">
-                <img 
-                  src="https://randomuser.me/api/portraits/women/44.jpg" 
-                  alt="Profile" 
+                <img
+                  src="https://randomuser.me/api/portraits/women/44.jpg"
+                  alt="Profile"
                   className="w-full h-full object-cover"
                 />
               </div>
-              <span 
+              <span
                 className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-green-500 border-2 border-white"
                 style={{ display: collapsed ? 'none' : 'block' }}
               ></span>
             </div>
-            
+
             {!collapsed && (
               <div className="ml-3 overflow-hidden">
                 <h3 className="text-white font-semibold truncate">BornBeforeDesign</h3>
@@ -12317,16 +12317,16 @@ const DashboardLayout = () => {
         <nav className="mt-4 px-2">
           <ul className="space-y-1">
             {menuItems.map((item) => {
-              const isActive = location.pathname === item.path || 
+              const isActive = location.pathname === item.path ||
                               (item.path === '/dashboard' && location.pathname === '/dashboard');
-              
+
               return (
                 <li key={item.path}>
                   <NavLink
                     to={item.path}
                     className={`flex items-center px-4 py-3 rounded-lg transition-all duration-200 ${
-                      isActive 
-                        ? 'bg-opacity-20 font-medium' 
+                      isActive
+                        ? 'bg-opacity-20 font-medium'
                         : 'hover:bg-opacity-10'
                     }`}
                     style={{
@@ -12337,12 +12337,12 @@ const DashboardLayout = () => {
                     <div className="flex items-center justify-center">
                       {item.icon}
                     </div>
-                    
+
                     {!collapsed && (
                       <div className="relative ml-3 whitespace-nowrap">
                         {item.name}
                         {isActive && (
-                          <span 
+                          <span
                             className="absolute bottom-0 left-0 w-full h-0.5 transform scale-x-100 transition-transform duration-300 origin-left"
                             style={{ backgroundColor: COLORS.primary }}
                           ></span>
@@ -12369,7 +12369,7 @@ const DashboardLayout = () => {
             <div className="flex items-center justify-center">
               <LogOut size={20} />
             </div>
-            
+
             {!collapsed && (
               <span className="ml-3 whitespace-nowrap">Se déconnecter</span>
             )}
@@ -12379,7 +12379,7 @@ const DashboardLayout = () => {
 
       {/* Mobile overlay */}
       {isMobile && !collapsed && (
-        <div 
+        <div
           className="fixed inset-0 bg-black bg-opacity-50 z-10"
           onClick={toggleSidebar}
         ></div>
@@ -12397,7 +12397,7 @@ const DashboardLayout = () => {
       )}
 
       {/* Main content */}
-      <main 
+      <main
         className="flex-1 overflow-auto transition-all duration-300 relative"
       >
         <div className="px-6 py-8 max-w-7xl mx-auto">
@@ -13281,12 +13281,12 @@ const cartItemsData: CartItem[] = [
 const fadeTransition = "transition-all duration-300 ease-in-out";
 
 // Composant CartItem pour afficher un livre dans le panier
-const CartItemCard = ({ 
-  item, 
-  onQuantityChange, 
-  onRemove 
-}: { 
-  item: CartItem; 
+const CartItemCard = ({
+  item,
+  onQuantityChange,
+  onRemove
+}: {
+  item: CartItem;
   onQuantityChange: (id: number, newQuantity: number) => void;
   onRemove: (id: number) => void;
 }) => {
@@ -13306,14 +13306,14 @@ const CartItemCard = ({
         {/* Image du livre */}
         <div className="md:w-1/6 p-4 flex items-center justify-center bg-gray-50">
           <div className="w-24 h-36 rounded-md overflow-hidden shadow-sm transform transition-transform duration-300 hover:scale-105">
-            <img 
+            <img
               src={item.coverImage}
               alt={item.title}
               className="w-full h-full object-cover"
             />
           </div>
         </div>
-        
+
         {/* Détails du livre */}
         <div className="md:w-5/6 p-6 flex flex-col md:flex-row md:items-center md:justify-between">
           <div className="flex-1">
@@ -13322,17 +13322,17 @@ const CartItemCard = ({
                 <h3 className="text-lg font-semibold" style={{ color: COLORS.secondary }}>{item.title}</h3>
                 <p className="text-gray-600">{item.author}</p>
               </div>
-              <div 
+              <div
                 className={`px-2 py-1 rounded-full text-xs font-medium ${
-                  item.type === 'digital' 
-                    ? 'bg-blue-100 text-blue-600' 
+                  item.type === 'digital'
+                    ? 'bg-blue-100 text-blue-600'
                     : 'bg-orange-100 text-orange-600'
                 } ${fadeTransition}`}
               >
                 {item.type === 'digital' ? 'Numérique' : 'Physique'}
               </div>
             </div>
-            
+
             <div className="flex items-center mt-2">
               <Book size={16} className="text-gray-400 mr-1" />
               <span className={`text-sm ${item.inStock ? 'text-green-500' : 'text-red-500'}`}>
@@ -13340,18 +13340,18 @@ const CartItemCard = ({
               </span>
             </div>
           </div>
-          
+
           {/* Quantité et prix */}
           <div className="flex flex-col md:flex-row md:items-center mt-4 md:mt-0 space-y-4 md:space-y-0 md:space-x-6">
             {/* Contrôles de quantité - seulement pour les livres physiques */}
             {item.type === 'physical' && (
               <div className="flex items-center">
-                <button 
+                <button
                   onClick={decreaseQuantity}
                   disabled={item.quantity <= 1}
                   className={`w-8 h-8 flex items-center justify-center rounded-l-md ${fadeTransition} ${
-                    item.quantity <= 1 
-                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                    item.quantity <= 1
+                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
@@ -13360,7 +13360,7 @@ const CartItemCard = ({
                 <div className="w-10 h-8 flex items-center justify-center border-t border-b border-gray-200">
                   {item.quantity}
                 </div>
-                <button 
+                <button
                   onClick={increaseQuantity}
                   className={`w-8 h-8 flex items-center justify-center rounded-r-md bg-gray-100 text-gray-700 ${fadeTransition} hover:bg-gray-200`}
                 >
@@ -13368,7 +13368,7 @@ const CartItemCard = ({
                 </button>
               </div>
             )}
-            
+
             {/* Prix */}
             <div className="text-right md:w-24">
               <p className="text-lg font-bold" style={{ color: COLORS.primary }}>
@@ -13380,9 +13380,9 @@ const CartItemCard = ({
                 </p>
               )}
             </div>
-            
+
             {/* Bouton supprimer */}
-            <button 
+            <button
               onClick={() => onRemove(item.id)}
               className={`p-2 rounded-full ${fadeTransition} hover:bg-red-50`}
               style={{ color: COLORS.danger }}
@@ -13397,10 +13397,10 @@ const CartItemCard = ({
 };
 
 // Composant récapitulatif du panier
-const CartSummary = ({ 
-  items, 
-  onCheckout 
-}: { 
+const CartSummary = ({
+  items,
+  onCheckout
+}: {
   items: CartItem[];
   onCheckout: () => void;
 }) => {
@@ -13409,7 +13409,7 @@ const CartSummary = ({
   const shipping = items.some(item => item.type === 'physical') ? 3.99 : 0;
   const tax = subtotal * 0.2; // TVA 20%
   const total = subtotal + shipping + tax;
-  
+
   const physicalCount = items.filter(item => item.type === 'physical')
     .reduce((sum, item) => sum + item.quantity, 0);
   const digitalCount = items.filter(item => item.type === 'digital').length;
@@ -13417,23 +13417,23 @@ const CartSummary = ({
   return (
     <div className={`bg-white rounded-xl shadow-md p-6 sticky top-6 ${fadeTransition}`}>
       <h3 className="text-lg font-bold mb-4" style={{ color: COLORS.secondary }}>Récapitulatif</h3>
-      
+
       <div className="space-y-3">
         <div className="flex justify-between">
           <span className="text-gray-600">Sous-total ({items.length} articles)</span>
           <span className="font-medium">{subtotal.toFixed(2)} €</span>
         </div>
-        
+
         <div className="flex justify-between">
           <span className="text-gray-600">TVA (20%)</span>
           <span className="font-medium">{tax.toFixed(2)} €</span>
         </div>
-        
+
         <div className="flex justify-between">
           <span className="text-gray-600">Frais de livraison</span>
           <span className="font-medium">{shipping.toFixed(2)} €</span>
         </div>
-        
+
         <div className="border-t border-gray-200 pt-3 mt-3">
           <div className="flex justify-between font-bold text-lg">
             <span>Total</span>
@@ -13441,11 +13441,11 @@ const CartSummary = ({
           </div>
         </div>
       </div>
-      
-      <button 
+
+      <button
         onClick={onCheckout}
         className={`w-full mt-6 px-4 py-3 rounded-lg text-white font-medium flex items-center justify-center ${fadeTransition} transform hover:scale-[1.02] active:scale-[0.98]`}
-        style={{ 
+        style={{
           backgroundColor: COLORS.primary,
           boxShadow: `0 4px 14px 0 ${COLORS.primary}30`
         }}
@@ -13453,14 +13453,14 @@ const CartSummary = ({
         <CreditCard size={18} className="mr-2" />
         Procéder au paiement
       </button>
-      
+
       <div className="mt-6 space-y-2 text-sm text-gray-500">
         <div className="flex items-start">
           <div className="bg-orange-100 rounded-full p-1 mr-2 mt-0.5">
             <Book size={12} className="text-orange-500" />
           </div>
           <p>
-            {physicalCount > 0 
+            {physicalCount > 0
               ? `${physicalCount} livre${physicalCount > 1 ? 's' : ''} physique${physicalCount > 1 ? 's' : ''} à livrer`
               : 'Aucun livre physique'
             }
@@ -13471,14 +13471,14 @@ const CartSummary = ({
             <Book size={12} className="text-blue-500" />
           </div>
           <p>
-            {digitalCount > 0 
+            {digitalCount > 0
               ? `${digitalCount} livre${digitalCount > 1 ? 's' : ''} numérique${digitalCount > 1 ? 's' : ''} à télécharger`
               : 'Aucun livre numérique'
             }
           </p>
         </div>
       </div>
-      
+
       {/* Badge de sécurité */}
       <div className="mt-8 pt-4 border-t border-gray-100">
         <div className="flex items-center justify-center">
@@ -13502,7 +13502,7 @@ const SuggestedProductButton = ({ title, price }: { title: string, price: number
         <h4 className="font-medium" style={{ color: COLORS.secondary }}>{title}</h4>
         <p className="text-sm" style={{ color: COLORS.primary }}>{price.toFixed(2)} €</p>
       </div>
-      <button 
+      <button
         className="p-2 rounded-full bg-orange-50 hover:bg-orange-100 transition-colors"
         style={{ color: COLORS.primary }}
       >
@@ -13532,8 +13532,8 @@ const CartPage = () => {
 
   // Gestionnaire de changement de quantité
   const handleQuantityChange = (id: number, newQuantity: number) => {
-    setCartItems(items => 
-      items.map(item => 
+    setCartItems(items =>
+      items.map(item =>
         item.id === id ? { ...item, quantity: newQuantity } : item
       )
     );
@@ -13556,15 +13556,15 @@ const CartPage = () => {
         <div className="space-y-8">
           {/* Navigation secondaire */}
           <nav className="flex items-center text-sm mb-8">
-            <a 
-              href="/" 
+            <a
+              href="/"
               className="text-gray-500 hover:text-gray-700 flex items-center"
             >
               Accueil
             </a>
             <span className="mx-2 text-gray-400">/</span>
-            <a 
-              href="/catalogue" 
+            <a
+              href="/catalogue"
               className="text-gray-500 hover:text-gray-700"
             >
               Catalogue
@@ -13572,21 +13572,21 @@ const CartPage = () => {
             <span className="mx-2 text-gray-400">/</span>
             <span style={{ color: COLORS.primary }}>Panier</span>
           </nav>
-          
+
           {/* En-tête */}
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-3xl font-bold" style={{ color: COLORS.secondary }}>Mon Panier</h1>
               <p className="text-gray-500">
-                {cartItems.length > 0 
+                {cartItems.length > 0
                   ? `${cartItems.length} article${cartItems.length > 1 ? 's' : ''} dans votre panier`
                   : 'Votre panier est vide'
                 }
               </p>
             </div>
-            
-            <a 
-              href="/catalogue" 
+
+            <a
+              href="/catalogue"
               className={`flex items-center px-4 py-2 rounded-lg border border-blue-100 bg-blue-50 ${fadeTransition} hover:bg-blue-100`}
               style={{ color: COLORS.secondary }}
             >
@@ -13594,21 +13594,21 @@ const CartPage = () => {
               Continuer mes achats
             </a>
           </div>
-          
+
           {/* Contenu principal */}
           {cartItems.length > 0 ? (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Liste des articles */}
               <div className="lg:col-span-2 space-y-4">
                 {cartItems.map(item => (
-                  <CartItemCard 
-                    key={item.id} 
-                    item={item} 
+                  <CartItemCard
+                    key={item.id}
+                    item={item}
                     onQuantityChange={handleQuantityChange}
                     onRemove={handleRemoveItem}
                   />
                 ))}
-                
+
                 {/* Section suggestions */}
                 <div className="mt-8">
                   <h3 className="text-xl font-bold mb-4" style={{ color: COLORS.secondary }}>Recommandations</h3>
@@ -13618,22 +13618,22 @@ const CartPage = () => {
                   </div>
                 </div>
               </div>
-              
+
               {/* Bloc latéral */}
               <div className="lg:col-span-1 space-y-6">
                 {/* Résumé du panier */}
                 <CartSummary items={cartItems} onCheckout={handleCheckout} />
-                
+
                 {/* Code promo */}
                 <div className="bg-white rounded-xl shadow-md p-6">
                   <h3 className="text-lg font-bold mb-3" style={{ color: COLORS.secondary }}>Code promo</h3>
                   <div className="flex">
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       placeholder="Entrez votre code"
                       className="flex-1 p-2 border border-gray-200 rounded-l-md focus:outline-none focus:border-orange-300"
                     />
-                    <button 
+                    <button
                       className="px-4 py-2 rounded-r-md text-white"
                       style={{ backgroundColor: COLORS.secondary }}
                     >
@@ -13652,7 +13652,7 @@ const CartPage = () => {
               <p className="text-gray-600 mb-6">
                 Explorez notre catalogue pour découvrir nos livres et ajouter des articles à votre panier.
               </p>
-              <a 
+              <a
                 href="/catalogue"
                 className={`inline-flex items-center px-6 py-3 rounded-lg text-white font-medium ${fadeTransition} hover:shadow-lg`}
                 style={{ backgroundColor: COLORS.primary }}
@@ -13662,7 +13662,7 @@ const CartPage = () => {
               </a>
             </div>
           )}
-          
+
           {/* Section d'aide */}
           <div className="mt-12 p-6 bg-gray-50 border border-gray-100 rounded-xl">
             <h3 className="text-lg font-semibold mb-4" style={{ color: COLORS.secondary }}>Besoin d'aide ?</h3>
@@ -13717,11 +13717,11 @@ import React, { useState } from 'react';
 const Profile = () => {
   // État pour gérer les différents onglets
   const [activeTab, setActiveTab] = useState('personal');
-  
+
   // Couleurs du thème
   const primaryColor = "#ff8c00";
   const secondaryColor = "#1b263b";
-  
+
   return (
     <div className="bg-gray-50 min-h-screen py-8 px-4">
       <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
@@ -13730,14 +13730,14 @@ const Profile = () => {
           <div className="flex flex-col md:flex-row items-center">
             <div className="relative mb-6 md:mb-0">
               <div className="w-36 h-36 rounded-full bg-white p-1 shadow-lg">
-                <div 
+                <div
                   className="w-full h-full rounded-full flex items-center justify-center"
                   style={{ backgroundColor: primaryColor }}
                 >
                   <span className="text-5xl font-bold text-white">BBD</span>
                 </div>
               </div>
-              <button 
+              <button
                 className="absolute bottom-0 right-0 rounded-full p-2"
                 style={{ backgroundColor: primaryColor }}
               >
@@ -13757,37 +13757,37 @@ const Profile = () => {
             </div>
           </div>
         </div>
-        
+
         {/* Navigation entre les sections */}
         <div className="px-6 border-b">
           <div className="flex overflow-x-auto">
-            <button 
+            <button
               onClick={() => setActiveTab('personal')}
               className={`py-4 px-6 font-medium transition-colors duration-200 whitespace-nowrap ${
-                activeTab === 'personal' 
-                  ? 'border-b-2 text-gray-800' 
+                activeTab === 'personal'
+                  ? 'border-b-2 text-gray-800'
                   : 'text-gray-500 hover:text-gray-700'
               }`}
               style={activeTab === 'personal' ? { borderColor: primaryColor } : {}}
             >
               Informations personnelles
             </button>
-            <button 
+            <button
               onClick={() => setActiveTab('preferences')}
               className={`py-4 px-6 font-medium transition-colors duration-200 whitespace-nowrap ${
-                activeTab === 'preferences' 
-                  ? 'border-b-2 text-gray-800' 
+                activeTab === 'preferences'
+                  ? 'border-b-2 text-gray-800'
                   : 'text-gray-500 hover:text-gray-700'
               }`}
               style={activeTab === 'preferences' ? { borderColor: primaryColor } : {}}
             >
               Préférences
             </button>
-            <button 
+            <button
               onClick={() => setActiveTab('security')}
               className={`py-4 px-6 font-medium transition-colors duration-200 whitespace-nowrap ${
-                activeTab === 'security' 
-                  ? 'border-b-2 text-gray-800' 
+                activeTab === 'security'
+                  ? 'border-b-2 text-gray-800'
                   : 'text-gray-500 hover:text-gray-700'
               }`}
               style={activeTab === 'security' ? { borderColor: primaryColor } : {}}
@@ -13796,7 +13796,7 @@ const Profile = () => {
             </button>
           </div>
         </div>
-        
+
         {/* Contenu des onglets */}
         <div className="p-8">
           {/* Informations personnelles */}
@@ -13805,15 +13805,15 @@ const Profile = () => {
               <h2 className="text-xl font-semibold mb-6" style={{ color: secondaryColor }}>
                 Informations personnelles
               </h2>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Prénom
                   </label>
-                  <input 
-                    type="text" 
-                    value="Jean" 
+                  <input
+                    type="text"
+                    value="Jean"
                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none transition"
                     style={{ focusRing: primaryColor }}
                   />
@@ -13822,9 +13822,9 @@ const Profile = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Nom
                   </label>
-                  <input 
-                    type="text" 
-                    value="Dupont" 
+                  <input
+                    type="text"
+                    value="Dupont"
                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none transition"
                   />
                 </div>
@@ -13832,9 +13832,9 @@ const Profile = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Email
                   </label>
-                  <input 
-                    type="email" 
-                    value="jean.dupont@example.com" 
+                  <input
+                    type="email"
+                    value="jean.dupont@example.com"
                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none transition"
                   />
                 </div>
@@ -13842,9 +13842,9 @@ const Profile = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Téléphone
                   </label>
-                  <input 
-                    type="tel" 
-                    value="06 12 34 56 78" 
+                  <input
+                    type="tel"
+                    value="06 12 34 56 78"
                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none transition"
                   />
                 </div>
@@ -13852,9 +13852,9 @@ const Profile = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Adresse
                   </label>
-                  <input 
-                    type="text" 
-                    value="123 Rue de la Bibliothèque" 
+                  <input
+                    type="text"
+                    value="123 Rue de la Bibliothèque"
                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none transition"
                   />
                 </div>
@@ -13862,15 +13862,15 @@ const Profile = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Bio
                   </label>
-                  <textarea 
+                  <textarea
                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none transition h-32"
                     placeholder="Parlez-nous de vous..."
                   ></textarea>
                 </div>
               </div>
-              
+
               <div className="mt-8 flex justify-end">
-                <button 
+                <button
                   className="px-6 py-3 rounded-lg text-white font-medium shadow-lg hover:shadow-xl transition-all"
                   style={{ backgroundColor: primaryColor }}
                 >
@@ -13879,18 +13879,18 @@ const Profile = () => {
               </div>
             </div>
           )}
-          
+
           {/* Préférences */}
           {activeTab === 'preferences' && (
             <div className="animate-fadeIn">
               <h2 className="text-xl font-semibold mb-6" style={{ color: secondaryColor }}>
                 Préférences
               </h2>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
                   <h3 className="text-lg font-medium mb-4" style={{ color: secondaryColor }}>Langue et région</h3>
-                  
+
                   <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Langue
@@ -13902,7 +13902,7 @@ const Profile = () => {
                       <option>Deutsch</option>
                     </select>
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Format de date
@@ -13914,10 +13914,10 @@ const Profile = () => {
                     </select>
                   </div>
                 </div>
-                
+
                 <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
                   <h3 className="text-lg font-medium mb-4" style={{ color: secondaryColor }}>Thème</h3>
-                  
+
                   <div className="space-y-4">
                     <div className="flex items-center">
                       <input type="radio" id="theme-light" name="theme" className="h-4 w-4" checked />
@@ -13933,10 +13933,10 @@ const Profile = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="bg-gray-50 p-6 rounded-xl border border-gray-200 md:col-span-2">
                   <h3 className="text-lg font-medium mb-4" style={{ color: secondaryColor }}>Notifications</h3>
-                  
+
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <div>
@@ -13948,7 +13948,7 @@ const Profile = () => {
                         <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
                       </label>
                     </div>
-                    
+
                     <div className="flex items-center justify-between">
                       <div>
                         <h4 className="font-medium">Notifications par SMS</h4>
@@ -13959,7 +13959,7 @@ const Profile = () => {
                         <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
                       </label>
                     </div>
-                    
+
                     <div className="flex items-center justify-between">
                       <div>
                         <h4 className="font-medium">Newsletter</h4>
@@ -13973,9 +13973,9 @@ const Profile = () => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="mt-8 flex justify-end">
-                <button 
+                <button
                   className="px-6 py-3 rounded-lg text-white font-medium shadow-lg hover:shadow-xl transition-all"
                   style={{ backgroundColor: primaryColor }}
                 >
@@ -13984,25 +13984,25 @@ const Profile = () => {
               </div>
             </div>
           )}
-          
+
           {/* Confidentialité et sécurité */}
           {activeTab === 'security' && (
             <div className="animate-fadeIn">
               <h2 className="text-xl font-semibold mb-6" style={{ color: secondaryColor }}>
                 Confidentialité et sécurité
               </h2>
-              
+
               <div className="space-y-8">
                 <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
                   <h3 className="text-lg font-medium mb-4" style={{ color: secondaryColor }}>Mot de passe</h3>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Mot de passe actuel
                       </label>
-                      <input 
-                        type="password" 
+                      <input
+                        type="password"
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none transition"
                         placeholder="••••••••"
                       />
@@ -14012,8 +14012,8 @@ const Profile = () => {
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Nouveau mot de passe
                       </label>
-                      <input 
-                        type="password" 
+                      <input
+                        type="password"
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none transition"
                         placeholder="••••••••"
                       />
@@ -14022,16 +14022,16 @@ const Profile = () => {
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Confirmer le mot de passe
                       </label>
-                      <input 
-                        type="password" 
+                      <input
+                        type="password"
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none transition"
                         placeholder="••••••••"
                       />
                     </div>
                   </div>
-                  
+
                   <div className="mt-4">
-                    <button 
+                    <button
                       className="px-4 py-2 rounded-lg text-white font-medium"
                       style={{ backgroundColor: primaryColor }}
                     >
@@ -14039,16 +14039,16 @@ const Profile = () => {
                     </button>
                   </div>
                 </div>
-                
+
                 <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
                   <h3 className="text-lg font-medium mb-4" style={{ color: secondaryColor }}>Authentification à deux facteurs</h3>
-                  
+
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="mb-1">Statut: <span className="text-red-500 font-medium">Désactivé</span></p>
                       <p className="text-sm text-gray-500">Protégez votre compte avec une couche de sécurité supplémentaire</p>
                     </div>
-                    <button 
+                    <button
                       className="px-4 py-2 rounded-lg text-white font-medium"
                       style={{ backgroundColor: secondaryColor }}
                     >
@@ -14056,10 +14056,10 @@ const Profile = () => {
                     </button>
                   </div>
                 </div>
-                
+
                 <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
                   <h3 className="text-lg font-medium mb-4" style={{ color: secondaryColor }}>Confidentialité du profil</h3>
-                  
+
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <div>
@@ -14071,7 +14071,7 @@ const Profile = () => {
                         <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
                       </label>
                     </div>
-                    
+
                     <div className="flex items-center justify-between">
                       <div>
                         <h4 className="font-medium">Afficher l'activité</h4>
@@ -14084,10 +14084,10 @@ const Profile = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
                   <h3 className="text-lg font-medium mb-4 text-red-500">Zone de danger</h3>
-                  
+
                   <div className="flex items-center justify-between">
                     <div>
                       <h4 className="font-medium">Supprimer mon compte</h4>
@@ -14223,7 +14223,7 @@ const ReservationCard = ({ reservation }: { reservation: Reservation }) => {
     const now = new Date();
     const diff = end.getTime() - now.getTime();
     const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-    
+
     if (days < 0) return 'Dépassé';
     if (days === 0) return 'Dernier jour';
     return `${days} jour${days > 1 ? 's' : ''} restant${days > 1 ? 's' : ''}`;
@@ -14235,14 +14235,14 @@ const ReservationCard = ({ reservation }: { reservation: Reservation }) => {
         {/* Couverture du livre */}
         <div className="md:w-1/4 p-4 flex items-center justify-center bg-gray-50">
           <div className="w-32 h-48 rounded-md overflow-hidden shadow-md">
-            <img 
+            <img
               src={reservation.coverImage}
               alt={reservation.title}
               className="w-full h-full object-cover"
             />
           </div>
         </div>
-        
+
         {/* Informations de la réservation */}
         <div className="md:w-3/4 p-6">
           <div className="flex justify-between items-start">
@@ -14250,7 +14250,7 @@ const ReservationCard = ({ reservation }: { reservation: Reservation }) => {
               <h3 className="text-xl font-bold text-gray-800">{reservation.title}</h3>
               <p className="text-gray-600">{reservation.author}</p>
             </div>
-            <div 
+            <div
               className="px-3 py-1 rounded-full text-sm font-medium"
               style={{
                 backgroundColor: `${getStatusColor(reservation.status)}15`,
@@ -14260,7 +14260,7 @@ const ReservationCard = ({ reservation }: { reservation: Reservation }) => {
               {getStatusLabel(reservation.status)}
             </div>
           </div>
-          
+
           <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex items-center">
               <Calendar size={18} className="mr-2 text-gray-500" />
@@ -14271,7 +14271,7 @@ const ReservationCard = ({ reservation }: { reservation: Reservation }) => {
                 </p>
               </div>
             </div>
-            
+
             <div className="flex items-center">
               <Clock size={18} className="mr-2 text-gray-500" />
               <div>
@@ -14285,17 +14285,17 @@ const ReservationCard = ({ reservation }: { reservation: Reservation }) => {
               </div>
             </div>
           </div>
-          
+
           <div className="mt-4">
             <p className="text-xs text-gray-500">Emplacement</p>
             <p className="text-sm">{reservation.location}</p>
           </div>
-          
+
           <div className="mt-6 flex space-x-3">
             {reservation.status === 'en_cours' && (
-              <button 
+              <button
                 className="px-4 py-2 rounded-lg flex items-center transition-colors"
-                style={{ 
+                style={{
                   backgroundColor: `${COLORS.success}15`,
                   color: COLORS.success
                 }}
@@ -14304,11 +14304,11 @@ const ReservationCard = ({ reservation }: { reservation: Reservation }) => {
                 Prolonger
               </button>
             )}
-            
+
             {reservation.status === 'en_attente' && (
-              <button 
+              <button
                 className="px-4 py-2 rounded-lg flex items-center transition-colors"
-                style={{ 
+                style={{
                   backgroundColor: `${COLORS.danger}15`,
                   color: COLORS.danger
                 }}
@@ -14317,10 +14317,10 @@ const ReservationCard = ({ reservation }: { reservation: Reservation }) => {
                 Annuler
               </button>
             )}
-            
-            <button 
+
+            <button
               className="px-4 py-2 rounded-lg flex items-center transition-colors"
-              style={{ 
+              style={{
                 backgroundColor: `${COLORS.secondary}15`,
                 color: COLORS.secondary
               }}
@@ -14338,7 +14338,7 @@ const ReservationCard = ({ reservation }: { reservation: Reservation }) => {
 const ReservationsPage = () => {
   const [activeFilter, setActiveFilter] = useState<ReservationStatus | 'toutes'>('toutes');
   const [searchQuery, setSearchQuery] = useState('');
-  
+
   // Filtrage des réservations
   const filteredReservations = reservationsData.filter(reservation => {
     const matchesFilter = activeFilter === 'toutes' || reservation.status === activeFilter;
@@ -14352,42 +14352,42 @@ const ReservationsPage = () => {
       {/* En-tête */}
       <div>
         <h1 className="text-2xl font-bold text-gray-800">Mes Réservations</h1>
-        <p className="text-gray-500">Gérez vos emprunts et réservations de livres</p>
+        <p className="text-gray-500">Gérez vos reservations et réservations de livres</p>
       </div>
-      
+
       {/* Barre de recherche et filtres */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="relative flex-1 max-w-md">
           <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-          <input 
-            type="text" 
-            placeholder="Rechercher un livre..." 
+          <input
+            type="text"
+            placeholder="Rechercher un livre..."
             className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        
+
         <div className="flex items-center overflow-x-auto space-x-2 py-1">
           <span className="flex items-center text-gray-500 mr-2">
             <Filter size={16} className="mr-1" /> Filtrer:
           </span>
-          
-          <button 
+
+          <button
             className={`px-3 py-1 rounded-lg text-sm whitespace-nowrap transition-colors ${
-              activeFilter === 'toutes' 
-                ? 'bg-gray-800 text-white' 
+              activeFilter === 'toutes'
+                ? 'bg-gray-800 text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
             onClick={() => setActiveFilter('toutes')}
           >
             Toutes
           </button>
-          
-          <button 
+
+          <button
             className={`px-3 py-1 rounded-lg text-sm whitespace-nowrap transition-colors ${
-              activeFilter === 'en_cours' 
-                ? `bg-${COLORS.primary} text-white` 
+              activeFilter === 'en_cours'
+                ? `bg-${COLORS.primary} text-white`
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
             style={activeFilter === 'en_cours' ? { backgroundColor: COLORS.primary } : {}}
@@ -14395,11 +14395,11 @@ const ReservationsPage = () => {
           >
             En cours
           </button>
-          
-          <button 
+
+          <button
             className={`px-3 py-1 rounded-lg text-sm whitespace-nowrap transition-colors ${
-              activeFilter === 'en_attente' 
-                ? 'bg-blue-500 text-white' 
+              activeFilter === 'en_attente'
+                ? 'bg-blue-500 text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
             style={activeFilter === 'en_attente' ? { backgroundColor: COLORS.pending } : {}}
@@ -14407,11 +14407,11 @@ const ReservationsPage = () => {
           >
             En attente
           </button>
-          
-          <button 
+
+          <button
             className={`px-3 py-1 rounded-lg text-sm whitespace-nowrap transition-colors ${
-              activeFilter === 'terminée' 
-                ? 'bg-green-500 text-white' 
+              activeFilter === 'terminée'
+                ? 'bg-green-500 text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
             style={activeFilter === 'terminée' ? { backgroundColor: COLORS.success } : {}}
@@ -14419,11 +14419,11 @@ const ReservationsPage = () => {
           >
             Terminées
           </button>
-          
-          <button 
+
+          <button
             className={`px-3 py-1 rounded-lg text-sm whitespace-nowrap transition-colors ${
-              activeFilter === 'annulée' 
-                ? 'bg-red-500 text-white' 
+              activeFilter === 'annulée'
+                ? 'bg-red-500 text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
             style={activeFilter === 'annulée' ? { backgroundColor: COLORS.danger } : {}}
@@ -14433,7 +14433,7 @@ const ReservationsPage = () => {
           </button>
         </div>
       </div>
-      
+
       {/* Liste des réservations */}
       <div className="space-y-6">
         {filteredReservations.length > 0 ? (
@@ -14447,9 +14447,9 @@ const ReservationsPage = () => {
             </div>
             <h3 className="text-lg font-medium text-gray-800">Aucune réservation trouvée</h3>
             <p className="text-gray-500 mt-2">
-              {searchQuery 
-                ? "Aucun résultat ne correspond à votre recherche." 
-                : activeFilter !== 'toutes' 
+              {searchQuery
+                ? "Aucun résultat ne correspond à votre recherche."
+                : activeFilter !== 'toutes'
                   ? `Vous n'avez pas de réservation ${getFilterLabel(activeFilter)}.`
                   : "Vous n'avez pas encore réservé de livre."
               }
@@ -14457,7 +14457,7 @@ const ReservationsPage = () => {
           </div>
         )}
       </div>
-      
+
       {/* Pagination */}
       {filteredReservations.length > 0 && (
         <div className="flex justify-center mt-8">
@@ -14547,8 +14547,8 @@ const chartData = [
 
 // Données pour la section des transactions
 const transactions = [
-  { 
-    id: 1, 
+  {
+    id: 1,
     title: 'Roman historique',
     category: 'Livre',
     time: '15:30',
@@ -14557,8 +14557,8 @@ const transactions = [
     color: '#3b82f6', // Blue
     icon: '📚'
   },
-  { 
-    id: 2, 
+  {
+    id: 2,
     title: 'Abonnement Premium',
     category: 'Service',
     time: '12:45',
@@ -14567,8 +14567,8 @@ const transactions = [
     color: '#8b5cf6', // Purple
     icon: '⭐'
   },
-  { 
-    id: 3, 
+  {
+    id: 3,
     title: 'Manga - Tome 5',
     category: 'BD/Manga',
     time: '10:15',
@@ -14577,8 +14577,8 @@ const transactions = [
     color: '#ec4899', // Pink
     icon: '🗯️'
   },
-  { 
-    id: 4, 
+  {
+    id: 4,
     title: 'Remboursement',
     category: 'Retour',
     time: '09:30',
@@ -14591,31 +14591,31 @@ const transactions = [
 
 // Données pour les statistiques d'utilisation
 const usageStats = [
-  { 
+  {
     title: 'Romans',
     percentage: 65,
     value: '652.400',
     color: '#3b82f6', // Blue
   },
-  { 
+  {
     title: 'Sciences',
     percentage: 45,
     value: '478.200',
     color: '#8b5cf6', // Purple
   },
-  { 
+  {
     title: 'BD/Manga',
     percentage: 80,
     value: '892.500',
     color: '#ec4899', // Pink
   },
-  { 
+  {
     title: 'Revues',
     percentage: 30,
     value: '324.700',
     color: '#10b981', // Green
   },
-  { 
+  {
     title: 'Numérique',
     percentage: 55,
     value: '556.000',
@@ -14638,13 +14638,13 @@ const StatCard = ({ title, value, percentChange, icon, color }: StatCardProps) =
   return (
     <div className="bg-white rounded-xl shadow-md p-6 flex flex-col transition-transform duration-300 hover:shadow-lg hover:-translate-y-1">
       <div className="flex items-center justify-between mb-4">
-        <div 
-          className="w-12 h-12 rounded-lg flex items-center justify-center" 
+        <div
+          className="w-12 h-12 rounded-lg flex items-center justify-center"
           style={{ backgroundColor: `${color}20` }}
         >
           <div style={{ color }}>{icon}</div>
         </div>
-        <span 
+        <span
           className={`flex items-center text-sm font-medium ${
             isPositive ? 'text-green-500' : 'text-red-500'
           }`}
@@ -14677,40 +14677,40 @@ const StatisticsPage = () => {
           <p className="text-gray-500">01 - 25 Avril, 2025</p>
         </div>
         <div className="flex space-x-2 mt-4 md:mt-0">
-          <button 
+          <button
             className={`px-4 py-2 rounded-lg transition-all ${
-              period === 'day' 
-                ? 'bg-orange-100 text-orange-600' 
+              period === 'day'
+                ? 'bg-orange-100 text-orange-600'
                 : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
             }`}
             onClick={() => setPeriod('day')}
           >
             Jour
           </button>
-          <button 
+          <button
             className={`px-4 py-2 rounded-lg transition-all ${
-              period === 'week' 
-                ? 'bg-orange-100 text-orange-600' 
+              period === 'week'
+                ? 'bg-orange-100 text-orange-600'
                 : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
             }`}
             onClick={() => setPeriod('week')}
           >
             Semaine
           </button>
-          <button 
+          <button
             className={`px-4 py-2 rounded-lg transition-all ${
-              period === 'month' 
-                ? 'bg-orange-100 text-orange-600' 
+              period === 'month'
+                ? 'bg-orange-100 text-orange-600'
                 : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
             }`}
             onClick={() => setPeriod('month')}
           >
             Mois
           </button>
-          <button 
+          <button
             className={`px-4 py-2 rounded-lg transition-all ${
-              period === 'year' 
-                ? 'bg-orange-100 text-orange-600' 
+              period === 'year'
+                ? 'bg-orange-100 text-orange-600'
                 : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
             }`}
             onClick={() => setPeriod('year')}
@@ -14722,28 +14722,28 @@ const StatisticsPage = () => {
 
       {/* Cartes statistiques */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard 
+        <StatCard
           title="Livres empruntés"
           value="256"
           percentChange={12.8}
           icon={<BarChart4 size={24} />}
           color={COLORS.primary}
         />
-        <StatCard 
+        <StatCard
           title="Total dépensé"
           value="185,20 €"
           percentChange={-4.3}
           icon={<DollarSign size={24} />}
           color="#8b5cf6"
         />
-        <StatCard 
+        <StatCard
           title="Livres en retard"
           value="3"
           percentChange={0}
           icon={<Percent size={24} />}
           color="#ef4444"
         />
-        <StatCard 
+        <StatCard
           title="Recommandations"
           value="28"
           percentChange={32.5}
@@ -14763,18 +14763,18 @@ const StatisticsPage = () => {
               Emprunts
             </div>
           </div>
-          
+
           {/* Graphique en barres */}
           <div className="h-64 flex items-end space-x-2">
             {chartData.map((data, index) => (
-              <div 
-                key={data.day} 
+              <div
+                key={data.day}
                 className="flex-1 flex flex-col items-center justify-end"
               >
-                <div 
+                <div
                   className="w-full max-w-full rounded-t-md transition-all duration-300 hover:opacity-80"
-                  style={{ 
-                    height: `${(data.value / maxValue) * 100}%`, 
+                  style={{
+                    height: `${(data.value / maxValue) * 100}%`,
                     backgroundColor: index === chartData.length - 1 ? COLORS.primary : '#e2e8f0',
                     minHeight: '4px'
                   }}
@@ -14798,7 +14798,7 @@ const StatisticsPage = () => {
             {transactions.map((transaction) => (
               <div key={transaction.id} className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors">
                 <div className="flex items-center">
-                  <div 
+                  <div
                     className="w-10 h-10 rounded-full flex items-center justify-center mr-3"
                     style={{ backgroundColor: `${transaction.color}15` }}
                   >
@@ -14836,9 +14836,9 @@ const StatisticsPage = () => {
                 <span className="text-gray-500">{stat.percentage}%</span>
               </div>
               <div className="h-2 bg-gray-200 rounded-full mb-2">
-                <div 
+                <div
                   className="h-full rounded-full"
-                  style={{ 
+                  style={{
                     width: `${stat.percentage}%`,
                     backgroundColor: stat.color
                   }}
@@ -14976,15 +14976,15 @@ const NotFoundPage = () => {
               </h1>
               <p className="text-lg mb-8 text-gray-700">Page Not Found              </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Link 
-                  to="/" 
+                <Link
+                  to="/"
                   className="bg-[#ff8c00] hover:bg-orange-600 text-white py-3 px-6 rounded-md font-medium text-center"
                 >
                   Home
                 </Link>
-                
+
               </div>
-            </div>  
+            </div>
         </div>
         </div>
 
@@ -14997,7 +14997,7 @@ export default NotFoundPage;// END OF FILE: src/pages/NotFoundPage.tsx
 
 //---> PATH: /c/Users/ELEONOR BJOUNKENG/Desktop/web-biblio-client/src/pages/readme.md
 
-#### dans ce dossier nous allons definir les differentes pages du projet 
+#### dans ce dossier nous allons definir les differentes pages du projet
 et chaque page devra etre dans un dossier portant le nom de la page// END OF FILE: src/pages/readme.md
 
 //---> PATH: /c/Users/ELEONOR BJOUNKENG/Desktop/web-biblio-client/src/pages/ThesisDetailsPage.tsx

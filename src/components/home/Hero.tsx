@@ -7,7 +7,6 @@ import heroImage from "../../assets/images/home/hero_image.jpg"
 import book1 from "../../assets/images/home/book1.jpg"
 import book2 from "../../assets/images/home/book2.jpg"
 import book3 from "../../assets/images/home/book3.jpg"
-import {useConfig} from "../../contexts/ConfigContext";
 
 const UniversityHero = () => {
     const [scrollY, setScrollY] = useState(0);

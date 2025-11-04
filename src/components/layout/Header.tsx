@@ -152,7 +152,7 @@ const Header: React.FC = () => {
                     </div>
                     <div className="py-2">
                         <NavLink
-                            to="/profile"
+                            to="/dashboard/profile"
                             className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
                             onClick={() => setShowUserMenu(false)}
                         >
@@ -160,7 +160,7 @@ const Header: React.FC = () => {
                             Mon Profil
                         </NavLink>
                         <NavLink
-                            to="/reservations"
+                            to="/dashboard/emprunts"
                             className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
                             onClick={() => setShowUserMenu(false)}
                         >
@@ -176,7 +176,7 @@ const Header: React.FC = () => {
                             )}
                         </NavLink>
                         <NavLink
-                            to="/messages"
+                            to="/dashboard/messages"
                             className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
                             onClick={() => setShowUserMenu(false)}
                         >
@@ -189,7 +189,7 @@ const Header: React.FC = () => {
                             )}
                         </NavLink>
                         <NavLink
-                            to="/history"
+                            to="/dashboard/history"
                             className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
                             onClick={() => setShowUserMenu(false)}
                         >
@@ -197,7 +197,7 @@ const Header: React.FC = () => {
                             Historique
                         </NavLink>
                         <NavLink
-                            to="/favorites"
+                            to="/dashboard/favorites"
                             className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
                             onClick={() => setShowUserMenu(false)}
                         >
@@ -205,7 +205,7 @@ const Header: React.FC = () => {
                             Favoris
                         </NavLink>
                         <NavLink
-                            to="/notifications"
+                            to="/dashboard/notifications"
                             className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
                             onClick={() => setShowUserMenu(false)}
                         >
@@ -219,7 +219,7 @@ const Header: React.FC = () => {
                         </NavLink>
                         <div className="border-t border-gray-100 my-2"></div>
                         <NavLink
-                            to="/settings"
+                            to="/dashboard/settings"
                             className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
                             onClick={() => setShowUserMenu(false)}
                         >
@@ -410,7 +410,7 @@ const Header: React.FC = () => {
                                     </div>
                                     <div className="space-y-1">
                                         <NavLink
-                                            to="/profile"
+                                            to="/dashboard/profile"
                                             className="flex items-center px-2 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
                                             onClick={() => setIsMenuOpen(false)}
                                         >
@@ -418,7 +418,7 @@ const Header: React.FC = () => {
                                             Mon Profil
                                         </NavLink>
                                         <NavLink
-                                            to="/reservations"
+                                            to="/dashboard/emprunts"
                                             className="flex items-center px-2 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
                                             onClick={() => setIsMenuOpen(false)}
                                         >
@@ -434,7 +434,7 @@ const Header: React.FC = () => {
                                             )}
                                         </NavLink>
                                         <NavLink
-                                            to="/notifications"
+                                            to="/dashboard/notifications"
                                             className="flex items-center px-2 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
                                             onClick={() => setIsMenuOpen(false)}
                                         >

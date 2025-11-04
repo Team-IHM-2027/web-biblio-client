@@ -123,7 +123,7 @@ const CartDropdown: React.FC<CartDropdownProps> = ({ currentUser, setCurrentUser
                         <div className="px-4 py-3 border-t border-gray-200">
                             <button
                                 onClick={() => {
-                                    navigate("/reservations");
+                                    navigate("/dashboard/emprunts");
                                     setShowCartDropdown(false);
                                 }}
                                 className="block w-full text-center cursor-pointer text-white py-2 rounded-lg hover:bg-blue-700 transition-colors"

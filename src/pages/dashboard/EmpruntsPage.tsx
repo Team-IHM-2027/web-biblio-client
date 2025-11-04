@@ -1,4 +1,3 @@
-// src/pages/dashboard/ReservationsPage.tsx
 import { useState } from 'react';
 import { Search, Filter, Calendar, Clock, Check, X, ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -110,7 +109,7 @@ const ReservationCard = ({ reservation }: { reservation: Reservation }) => {
     const now = new Date();
     const diff = end.getTime() - now.getTime();
     const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-    
+
     if (days < 0) return 'Dépassé';
     if (days === 0) return 'Dernier jour';
     return `${days} jour${days > 1 ? 's' : ''} restant${days > 1 ? 's' : ''}`;
@@ -122,14 +121,14 @@ const ReservationCard = ({ reservation }: { reservation: Reservation }) => {
         {/* Couverture du livre */}
         <div className="md:w-1/4 p-4 flex items-center justify-center bg-gray-50">
           <div className="w-32 h-48 rounded-md overflow-hidden shadow-md">
-            <img 
+            <img
               src={reservation.coverImage}
               alt={reservation.title}
               className="w-full h-full object-cover"
             />
           </div>
         </div>
-        
+
         {/* Informations de la réservation */}
         <div className="md:w-3/4 p-6">
           <div className="flex justify-between items-start">
@@ -137,7 +136,7 @@ const ReservationCard = ({ reservation }: { reservation: Reservation }) => {
               <h3 className="text-xl font-bold text-gray-800">{reservation.title}</h3>
               <p className="text-gray-600">{reservation.author}</p>
             </div>
-            <div 
+            <div
               className="px-3 py-1 rounded-full text-sm font-medium"
               style={{
                 backgroundColor: `${getStatusColor(reservation.status)}15`,
@@ -147,7 +146,7 @@ const ReservationCard = ({ reservation }: { reservation: Reservation }) => {
               {getStatusLabel(reservation.status)}
             </div>
           </div>
-          
+
           <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex items-center">
               <Calendar size={18} className="mr-2 text-gray-500" />
@@ -158,7 +157,7 @@ const ReservationCard = ({ reservation }: { reservation: Reservation }) => {
                 </p>
               </div>
             </div>
-            
+
             <div className="flex items-center">
               <Clock size={18} className="mr-2 text-gray-500" />
               <div>
@@ -172,17 +171,17 @@ const ReservationCard = ({ reservation }: { reservation: Reservation }) => {
               </div>
             </div>
           </div>
-          
+
           <div className="mt-4">
             <p className="text-xs text-gray-500">Emplacement</p>
             <p className="text-sm">{reservation.location}</p>
           </div>
-          
+
           <div className="mt-6 flex space-x-3">
             {reservation.status === 'en_cours' && (
-              <button 
+              <button
                 className="px-4 py-2 rounded-lg flex items-center transition-colors"
-                style={{ 
+                style={{
                   backgroundColor: `${COLORS.success}15`,
                   color: COLORS.success
                 }}
@@ -191,11 +190,11 @@ const ReservationCard = ({ reservation }: { reservation: Reservation }) => {
                 Prolonger
               </button>
             )}
-            
+
             {reservation.status === 'en_attente' && (
-              <button 
+              <button
                 className="px-4 py-2 rounded-lg flex items-center transition-colors"
-                style={{ 
+                style={{
                   backgroundColor: `${COLORS.danger}15`,
                   color: COLORS.danger
                 }}
@@ -204,10 +203,10 @@ const ReservationCard = ({ reservation }: { reservation: Reservation }) => {
                 Annuler
               </button>
             )}
-            
-            <button 
+
+            <button
               className="px-4 py-2 rounded-lg flex items-center transition-colors"
-              style={{ 
+              style={{
                 backgroundColor: `${COLORS.secondary}15`,
                 color: COLORS.secondary
               }}
@@ -225,7 +224,7 @@ const ReservationCard = ({ reservation }: { reservation: Reservation }) => {
 const ReservationsPage = () => {
   const [activeFilter, setActiveFilter] = useState<ReservationStatus | 'toutes'>('toutes');
   const [searchQuery, setSearchQuery] = useState('');
-  
+
   // Filtrage des réservations
   const filteredReservations = reservationsData.filter(reservation => {
     const matchesFilter = activeFilter === 'toutes' || reservation.status === activeFilter;
@@ -241,40 +240,40 @@ const ReservationsPage = () => {
         <h1 className="text-2xl font-bold text-gray-800">Mes Emprunts</h1>
         <p className="text-gray-500">Gérez vos emprunts et réservations de livres</p>
       </div>
-      
+
       {/* Barre de recherche et filtres */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="relative flex-1 max-w-md">
           <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-          <input 
-            type="text" 
-            placeholder="Rechercher un livre..." 
+          <input
+            type="text"
+            placeholder="Rechercher un livre..."
             className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        
+
         <div className="flex items-center overflow-x-auto space-x-2 py-1">
           <span className="flex items-center text-gray-500 mr-2">
             <Filter size={16} className="mr-1" /> Filtrer:
           </span>
-          
-          <button 
+
+          <button
             className={`px-3 py-1 rounded-lg text-sm whitespace-nowrap transition-colors ${
-              activeFilter === 'toutes' 
-                ? 'bg-gray-800 text-white' 
+              activeFilter === 'toutes'
+                ? 'bg-gray-800 text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
             onClick={() => setActiveFilter('toutes')}
           >
             Toutes
           </button>
-          
-          <button 
+
+          <button
             className={`px-3 py-1 rounded-lg text-sm whitespace-nowrap transition-colors ${
-              activeFilter === 'en_cours' 
-                ? `bg-${COLORS.primary} text-white` 
+              activeFilter === 'en_cours'
+                ? `bg-${COLORS.primary} text-white`
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
             style={activeFilter === 'en_cours' ? { backgroundColor: COLORS.primary } : {}}
@@ -282,11 +281,11 @@ const ReservationsPage = () => {
           >
             En cours
           </button>
-          
-          <button 
+
+          <button
             className={`px-3 py-1 rounded-lg text-sm whitespace-nowrap transition-colors ${
-              activeFilter === 'en_attente' 
-                ? 'bg-blue-500 text-white' 
+              activeFilter === 'en_attente'
+                ? 'bg-blue-500 text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
             style={activeFilter === 'en_attente' ? { backgroundColor: COLORS.pending } : {}}
@@ -294,11 +293,11 @@ const ReservationsPage = () => {
           >
             En attente
           </button>
-          
-          <button 
+
+          <button
             className={`px-3 py-1 rounded-lg text-sm whitespace-nowrap transition-colors ${
-              activeFilter === 'terminée' 
-                ? 'bg-green-500 text-white' 
+              activeFilter === 'terminée'
+                ? 'bg-green-500 text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
             style={activeFilter === 'terminée' ? { backgroundColor: COLORS.success } : {}}
@@ -306,11 +305,11 @@ const ReservationsPage = () => {
           >
             Terminées
           </button>
-          
-          <button 
+
+          <button
             className={`px-3 py-1 rounded-lg text-sm whitespace-nowrap transition-colors ${
-              activeFilter === 'annulée' 
-                ? 'bg-red-500 text-white' 
+              activeFilter === 'annulée'
+                ? 'bg-red-500 text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
             style={activeFilter === 'annulée' ? { backgroundColor: COLORS.danger } : {}}
@@ -320,7 +319,7 @@ const ReservationsPage = () => {
           </button>
         </div>
       </div>
-      
+
       {/* Liste des réservations */}
       <div className="space-y-6">
         {filteredReservations.length > 0 ? (
@@ -334,9 +333,9 @@ const ReservationsPage = () => {
             </div>
             <h3 className="text-lg font-medium text-gray-800">Aucune réservation trouvée</h3>
             <p className="text-gray-500 mt-2">
-              {searchQuery 
-                ? "Aucun résultat ne correspond à votre recherche." 
-                : activeFilter !== 'toutes' 
+              {searchQuery
+                ? "Aucun résultat ne correspond à votre recherche."
+                : activeFilter !== 'toutes'
                   ? `Vous n'avez pas de réservation ${getFilterLabel(activeFilter)}.`
                   : "Vous n'avez pas encore réservé de livre."
               }
@@ -344,7 +343,7 @@ const ReservationsPage = () => {
           </div>
         )}
       </div>
-      
+
       {/* Pagination */}
       {filteredReservations.length > 0 && (
         <div className="flex justify-center mt-8">

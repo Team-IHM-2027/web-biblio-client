@@ -146,7 +146,7 @@ const Footer = () => {
                                     onMouseEnter={(e) => e.currentTarget.style.color = primaryColor}
                                     onMouseLeave={(e) => e.currentTarget.style.color = '#d1d5db'}
                                 >
-                                    Mes emprunts
+                                    Mes reservations
                                 </a>
                             </li>
                             <li>
