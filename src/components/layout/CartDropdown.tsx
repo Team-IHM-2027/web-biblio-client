@@ -122,10 +122,13 @@ const CartDropdown: React.FC<CartDropdownProps> = ({ currentUser, setCurrentUser
                     {tabEtatEntries.length > 0 && (
                         <div className="px-4 py-3 border-t border-gray-200">
                             <button
-                                onClick={() => {
-                                    navigate("/dashboard/emprunts");
-                                    setShowCartDropdown(false);
-                                }}
+                               onClick={() => {
+    navigate("/dashboard/emprunts", {
+        state: { reservations: tabEtatEntries }
+    });
+    setShowCartDropdown(false);
+}}
+
                                 className="block w-full text-center cursor-pointer text-white py-2 rounded-lg hover:bg-blue-700 transition-colors"
                                 style={{ backgroundColor: primaryColor }}
                             >

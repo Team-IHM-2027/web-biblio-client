@@ -1,3 +1,4 @@
+
 // src/layouts/DashboardLayout.tsx
 import { useState, useEffect, JSX } from 'react';
 import { NavLink, Outlet, useLocation, Link } from 'react-router-dom';
@@ -101,7 +102,7 @@ const DashboardLayout = () => {
       path: '/dashboard/emprunts',
       name: 'Emprunts',
       icon: <Calendar size={20} />,
-      badge: 2
+      badge: 0
     },
     {
       path: '/dashboard/chat',
@@ -118,7 +119,7 @@ const DashboardLayout = () => {
       path: '/dashboard/notifications',
       name: 'Notifications',
       icon: <Bell size={20} />,
-      badge: 5
+      badge: 0
     }
   ];
 
@@ -264,7 +265,8 @@ const DashboardLayout = () => {
                     {!collapsed && (
                       <div className="relative ml-3 flex-1 z-10">
                         <span className="whitespace-nowrap">{item.name}</span>
-                        {item.badge && (
+                        {/* Affiche le badge uniquement si > 0 */}
+                        {item.badge !== undefined && item.badge > 0 && (
                           <span
                             className="absolute -top-2 -right-2 w-5 h-5 text-xs font-bold rounded-full
                                      flex items-center justify-center text-white"
@@ -276,7 +278,7 @@ const DashboardLayout = () => {
                       </div>
                     )}
 
-                    {collapsed && item.badge && (
+                    {collapsed && item.badge !== undefined && item.badge > 0 && (
                       <span
                         className="absolute -top-1 -right-1 w-4 h-4 text-xs font-bold rounded-full
                                  flex items-center justify-center text-white"
