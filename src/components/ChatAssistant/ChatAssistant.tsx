@@ -1,4 +1,3 @@
-// client-app/src/components/ChatAssistant/ChatAssistant.tsx
 import React, { useState, useRef, useEffect } from 'react';
 import { AssistantApi } from '../../services/api/AssistantApi';
 import './ChatAssistant.css';

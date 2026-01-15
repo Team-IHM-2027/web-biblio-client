@@ -4,9 +4,10 @@ import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
 import { auth } from '../../configs/firebase';
 import { useConfig } from '../../contexts/ConfigContext';
 import { authService } from '../../services/auth/authService';
-import {BiblioUser} from '../../types/auth';
+import { BiblioUser } from '../../types/auth';
 import { BookOpen, ShoppingBag, User, Menu, X, LogOut, Settings, Bell, MessageCircle, History, Heart } from 'lucide-react';
 import CartDropdown from "./CartDropdown.tsx";
+import NotificationIcon from '../common/NotificationIcon';
 
 const Header: React.FC = () => {
     const navigate = useNavigate();
@@ -27,20 +28,20 @@ const Header: React.FC = () => {
     const unreadMessages = currentUser?.messages?.filter(m => !m.lu && !m.lue)?.length || 0;
     // const totalEtat: number = orgSettings?.MaximumSimultaneousLoans || 5;
 
-/*    const extractTabEtatReserved = (user: BiblioUser, max: number = totalEtat): TabEtatEntry[] => {
-        const reserved: TabEtatEntry[] = [];
-
-        for (let i = 1; i <= max; i++) {
-            const etatKey = `etat${i}` as keyof BiblioUser;
-            const tabEtatKey = `tabEtat${i}` as keyof BiblioUser;
-
-            if (user[etatKey] === 'reserv' && Array.isArray(user[tabEtatKey])) {
-                reserved.push(user[tabEtatKey] as TabEtatEntry);
+    /*    const extractTabEtatReserved = (user: BiblioUser, max: number = totalEtat): TabEtatEntry[] => {
+            const reserved: TabEtatEntry[] = [];
+    
+            for (let i = 1; i <= max; i++) {
+                const etatKey = `etat${i}` as keyof BiblioUser;
+                const tabEtatKey = `tabEtat${i}` as keyof BiblioUser;
+    
+                if (user[etatKey] === 'reserv' && Array.isArray(user[tabEtatKey])) {
+                    reserved.push(user[tabEtatKey] as TabEtatEntry);
+                }
             }
-        }
-
-        return reserved;
-    };*/
+    
+            return reserved;
+        };*/
 
     useEffect(() => {
         const handleScroll = () => {
@@ -131,12 +132,6 @@ const Header: React.FC = () => {
                     <div className="px-4 py-3 border-b border-gray-100">
                         <div className="grid grid-cols-3 gap-4 text-center">
                             <div>
-                                <p className="text-lg font-bold" style={{ color: primaryColor }}>
-                                    {reservationCount}
-                                </p>
-                                <p className="text-xs text-gray-500">Réservations</p>
-                            </div>
-                            <div>
                                 <p className="text-lg font-bold text-blue-600">
                                     {currentUser?.historique?.length || 0}
                                 </p>
@@ -144,6 +139,12 @@ const Header: React.FC = () => {
                             </div>
                             <div>
                                 <p className="text-lg font-bold text-green-600">
+                                    {reservationCount}
+                                </p>
+                                <p className="text-xs text-gray-500">Réservations</p>
+                            </div>
+                            <div>
+                                <p className="text-lg font-bold text-orange-600">
                                     {currentUser?.docRecent?.length || 0}
                                 </p>
                                 <p className="text-xs text-gray-500">Récents</p>
@@ -159,22 +160,7 @@ const Header: React.FC = () => {
                             <User className="w-4 h-4 mr-3" />
                             Mon Profil
                         </NavLink>
-                        <NavLink
-                            to="/dashboard/emprunts"
-                            className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
-                            onClick={() => setShowUserMenu(false)}
-                        >
-                            <ShoppingBag className="w-4 h-4 mr-3" />
-                            Mes Réservations
-                            {reservationCount > 0 && (
-                                <span
-                                    className="ml-auto px-2 py-1 text-xs text-white rounded-full"
-                                    style={{ backgroundColor: primaryColor }}
-                                >
-                                    {reservationCount}
-                                </span>
-                            )}
-                        </NavLink>
+
                         <NavLink
                             to="/dashboard/messages"
                             className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
@@ -189,12 +175,20 @@ const Header: React.FC = () => {
                             )}
                         </NavLink>
                         <NavLink
-                            to="/dashboard/history"
+                            to="/dashboard/emprunts"
                             className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
                             onClick={() => setShowUserMenu(false)}
                         >
                             <History className="w-4 h-4 mr-3" />
-                            Historique
+                            Historique & Réservations
+                            {reservationCount > 0 && (
+                                <span
+                                    className="ml-auto px-2 py-1 text-xs text-white rounded-full"
+                                    style={{ backgroundColor: primaryColor }}
+                                >
+                                    {reservationCount}
+                                </span>
+                            )}
                         </NavLink>
                         <NavLink
                             to="/dashboard/favorites"
@@ -235,8 +229,9 @@ const Header: React.FC = () => {
                         </button>
                     </div>
                 </div>
-            )}
-        </div>
+            )
+            }
+        </div >
     );
 
     const AuthButtons = () => (
@@ -266,11 +261,10 @@ const Header: React.FC = () => {
 
     return (
         <header
-            className={`sticky top-0 z-40 transition-all duration-300 ${
-                scrolled
-                    ? 'bg-white/95 backdrop-blur-sm shadow-lg border-b border-gray-200'
-                    : 'bg-white border-b border-gray-200'
-            }`}
+            className={`sticky top-0 z-40 transition-all duration-300 ${scrolled
+                ? 'bg-white/95 backdrop-blur-sm shadow-lg border-b border-gray-200'
+                : 'bg-white border-b border-gray-200'
+                }`}
         >
             <div className="container mx-auto px-4">
                 <div className="flex items-center justify-between h-16">
@@ -294,10 +288,9 @@ const Header: React.FC = () => {
                         <NavLink
                             to="/"
                             className={({ isActive }) =>
-                                `transition-colors ${
-                                    isActive
-                                        ? 'font-semibold'
-                                        : 'text-gray-600 hover:text-gray-900'
+                                `transition-colors ${isActive
+                                    ? 'font-semibold'
+                                    : 'text-gray-600 hover:text-gray-900'
                                 }`
                             }
                             style={({ isActive }) => isActive ? { color: primaryColor } : {}}
@@ -307,10 +300,9 @@ const Header: React.FC = () => {
                         <NavLink
                             to="/books"
                             className={({ isActive }) =>
-                                `transition-colors ${
-                                    isActive
-                                        ? 'font-semibold'
-                                        : 'text-gray-600 hover:text-gray-900'
+                                `transition-colors ${isActive
+                                    ? 'font-semibold'
+                                    : 'text-gray-600 hover:text-gray-900'
                                 }`
                             }
                             style={({ isActive }) => isActive ? { color: primaryColor } : {}}
@@ -320,10 +312,9 @@ const Header: React.FC = () => {
                         <NavLink
                             to="/thesis"
                             className={({ isActive }) =>
-                                `transition-colors ${
-                                    isActive
-                                        ? 'font-semibold'
-                                        : 'text-gray-600 hover:text-gray-900'
+                                `transition-colors ${isActive
+                                    ? 'font-semibold'
+                                    : 'text-gray-600 hover:text-gray-900'
                                 }`
                             }
                             style={({ isActive }) => isActive ? { color: primaryColor } : {}}
@@ -333,10 +324,9 @@ const Header: React.FC = () => {
                         <NavLink
                             to="/helps"
                             className={({ isActive }) =>
-                                `transition-colors ${
-                                    isActive
-                                        ? 'font-semibold'
-                                        : 'text-gray-600 hover:text-gray-900'
+                                `transition-colors ${isActive
+                                    ? 'font-semibold'
+                                    : 'text-gray-600 hover:text-gray-900'
                                 }`
                             }
                             style={({ isActive }) => isActive ? { color: primaryColor } : {}}
@@ -347,6 +337,7 @@ const Header: React.FC = () => {
                     <div className="flex items-center space-x-4">
                         {currentUser && firebaseUser?.emailVerified && (
                             <>
+                                <NotificationIcon currentUser={currentUser} />
                                 <CartDropdown currentUser={currentUser} setCurrentUser={setCurrentUser} />
                                 <UserMenu />
                             </>
@@ -417,22 +408,7 @@ const Header: React.FC = () => {
                                             <User className="w-4 h-4 mr-3" />
                                             Mon Profil
                                         </NavLink>
-                                        <NavLink
-                                            to="/dashboard/emprunts"
-                                            className="flex items-center px-2 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
-                                            onClick={() => setIsMenuOpen(false)}
-                                        >
-                                            <ShoppingBag className="w-4 h-4 mr-3" />
-                                            Réservations
-                                            {reservationCount > 0 && (
-                                                <span
-                                                    className="ml-auto px-2 py-1 text-xs text-white rounded-full"
-                                                    style={{ backgroundColor: primaryColor }}
-                                                >
-                                                    {reservationCount}
-                                                </span>
-                                            )}
-                                        </NavLink>
+
                                         <NavLink
                                             to="/dashboard/notifications"
                                             className="flex items-center px-2 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"

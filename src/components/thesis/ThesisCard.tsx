@@ -26,6 +26,7 @@ interface ThesisCardProps {
     isFavorite?: boolean;
     isLoading?: boolean;
     className?: string;
+    userLoggedIn?: boolean;
 }
 
 // Fonction helper pour vérifier si une clé est valide pour BiblioUser
@@ -167,9 +168,9 @@ const ThesisCard: React.FC<ThesisCardProps> = ({
     if (viewMode === 'grid') {
         return (
             <div className={`bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${className}`}>
-                <Link to={`/thesis/${thesis.id}`} className="block group">
-                    {/* Image */}
-                    <div className="relative aspect-[3/2] overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
+                {/* Image with Link and Actions */}
+                <div className="relative aspect-[3/2] overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
+                    <Link to={`/thesis/${thesis.id}`} className="block group w-full h-full">
                         {thesis.image && !imageError ? (
                             <img
                                 src={thesis.image}
@@ -185,51 +186,52 @@ const ThesisCard: React.FC<ThesisCardProps> = ({
                                 />
                             </div>
                         )}
+                    </Link>
 
-                        {/* Overlay avec actions */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300">
-                            <div className="absolute bottom-4 left-4 right-4">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        {/* Badge département */}
-                                        <span
-                                            className="px-3 py-1 rounded-full text-xs font-medium text-white"
-                                            style={{ backgroundColor: primaryColor }}
+                    {/* Overlay with actions - OUTSIDE the Link */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 hover:opacity-100 transition-all duration-300">
+                        <div className="absolute bottom-4 left-4 right-4">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    {/* Badge département */}
+                                    <span
+                                        className="px-3 py-1 rounded-full text-xs font-medium text-white"
+                                        style={{ backgroundColor: primaryColor }}
+                                    >
+                                        {thesis.département}
+                                    </span>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                    {/* Bouton favoris */}
+                                    <button
+                                        onClick={handleToggleFavorite}
+                                        className={`p-2 rounded-full transition-all duration-200 ${
+                                            isFavorite
+                                                ? 'bg-red-500 text-white'
+                                                : 'bg-white/20 backdrop-blur-sm text-white hover:bg-red-500'
+                                        }`}
+                                    >
+                                        <Heart size={16} fill={isFavorite ? 'currentColor' : 'none'} />
+                                    </button>
+
+                                    {/* Lien PDF si disponible - NOW OUTSIDE Link */}
+                                    {thesis.pdfUrl && (
+                                        <a
+                                            href={thesis.pdfUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            onClick={(e) => e.stopPropagation()}
+                                            className="p-2 bg-white/20 backdrop-blur-sm text-white rounded-full hover:bg-blue-500 transition-all duration-200"
                                         >
-                                            {thesis.département}
-                                        </span>
-                                    </div>
-
-                                    <div className="flex items-center gap-2">
-                                        {/* Bouton favoris */}
-                                        <button
-                                            onClick={handleToggleFavorite}
-                                            className={`p-2 rounded-full transition-all duration-200 ${
-                                                isFavorite
-                                                    ? 'bg-red-500 text-white'
-                                                    : 'bg-white/20 backdrop-blur-sm text-white hover:bg-red-500'
-                                            }`}
-                                        >
-                                            <Heart size={16} fill={isFavorite ? 'currentColor' : 'none'} />
-                                        </button>
-
-                                        {/* Lien PDF si disponible */}
-                                        {thesis.pdfUrl && (
-                                            <a
-                                                href={thesis.pdfUrl}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="p-2 bg-white/20 backdrop-blur-sm text-white rounded-full hover:bg-blue-500 transition-all duration-200"
-                                            >
-                                                <ExternalLink size={16} />
-                                            </a>
-                                        )}
-                                    </div>
+                                            <ExternalLink size={16} />
+                                        </a>
+                                    )}
                                 </div>
                             </div>
                         </div>
                     </div>
-                </Link>
+                </div>
 
                 {/* Contenu */}
                 <div className="p-6">
@@ -298,42 +300,19 @@ const ThesisCard: React.FC<ThesisCardProps> = ({
                                         />
                                     ))}
                                 </div>
-                                <span className="text-sm text-gray-600 ml-2">
-                                    ({thesis.commentaire.length})
-                                </span>
                             </div>
                         )}
                     </Link>
 
-                    {/* Actions */}
-                    <div className="flex gap-2 pt-4 border-t border-gray-100">
+                    {/* Action buttons - OUTSIDE both Links */}
+                    <div className="flex gap-2 mt-4">
                         <button
                             onClick={handleReserve}
-                            disabled={isReserving || !isAuthenticated}
-                            className={`flex-1 py-2.5 px-4 rounded-lg font-medium transition-all duration-200 flex items-center justify-center ${
-                                isAuthenticated
-                                    ? `border-2 hover:shadow-lg transform hover:scale-[1.02] ${isReserving ? 'opacity-75 cursor-not-allowed' : ''}`
-                                    : 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                            }`}
-                            style={{
-                                borderColor: isAuthenticated ? primaryColor : undefined,
-                                color: isAuthenticated ? primaryColor : undefined
-                            }}
+                            disabled={isReserving}
+                            className="flex-1 px-4 py-2 rounded-lg text-white font-medium transition-all duration-200 disabled:opacity-50"
+                            style={{ backgroundColor: primaryColor }}
                         >
-                            {isReserving ? (
-                                <div className="flex items-center">
-                                    <div className="w-4 h-4 border-2 border-t-transparent rounded-full animate-spin mr-2"
-                                         style={{ borderColor: primaryColor }}></div>
-                                    Réservation...
-                                </div>
-                            ) : isAuthenticated ? (
-                                <>
-                                    <BookOpen size={16} className="mr-2" />
-                                    Réserver
-                                </>
-                            ) : (
-                                'Connexion requise'
-                            )}
+                            {isReserving ? 'Réservation...' : 'Réserver'}
                         </button>
                     </div>
                 </div>

@@ -1,5 +1,9 @@
-import React, { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { authService } from "../../services/auth/authService";
+import { BiblioUser, TabEtatEntry } from "../../types/auth";
+import { useConfig } from "../../contexts/ConfigContext";
+import LoadingSpinner from "../../components/common/LoadingSpinner";
+import { Clock, Calendar, CheckCircle, AlertCircle } from "lucide-react";
 
 // Type local pour l'affichage
 type Reservation = {
@@ -14,28 +18,61 @@ type Reservation = {
 };
 
 const ReservationsPage: React.FC = () => {
-  const location = useLocation();
+  const navigate = useNavigate();
+  const { orgSettings } = useConfig();
+  const [currentUser, setCurrentUser] = useState<BiblioUser | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [reservations, setReservations] = useState<Reservation[]>([]);
 
-  // Données envoyées depuis le dropdown (navigate(path, { state: { reservations } }))
-  const incomingReservations: any[] = location.state?.reservations || [];
+  const maxLoans = orgSettings?.MaximumSimultaneousLoans || 5;
 
-  // Transformation minimale pour correspondre à l'UI
-  const mappedReservations: Reservation[] = incomingReservations.map((entry: any, index: number) => {
-    const [idDoc, nameDoc, categorie, image] = entry ?? [];
+  useEffect(() => {
+    const fetchUserAndData = async () => {
+      try {
+        const user = await authService.getCurrentUser();
+        if (user) {
+          setCurrentUser(user);
 
-    return {
-      id: typeof idDoc === "number" ? idDoc : index,
-      title: nameDoc ?? "Titre inconnu",
-      author: "Auteur inconnu",
-      coverImage: image || `https://placehold.co/200x300/1b263b/ffffff?text=Livre`,
-      status: "En attente",
-      startDate: new Date().toISOString(),
-      endDate: new Date().toISOString(),
-      location: categorie ?? "Bibliothèque",
+          const mapped: Reservation[] = [];
+
+          // Parcourir les états 1 à N
+          for (let i = 1; i <= maxLoans; i++) {
+            const etatKey = `etat${i}` as keyof BiblioUser;
+            const tabEtatKey = `tabEtat${i}` as keyof BiblioUser;
+
+            const etat = user[etatKey];
+            const tabEtat = user[tabEtatKey] as TabEtatEntry;
+
+            if ((etat === 'reserv' || etat === 'emprunt') && Array.isArray(tabEtat)) {
+              const [idDoc, nameDoc, categorie, image] = tabEtat;
+
+              mapped.push({
+                id: i,
+                title: nameDoc ?? "Titre inconnu",
+                author: "Auteur inconnu",
+                coverImage: image || `https://placehold.co/200x300/1b263b/ffffff?text=Livre`,
+                status: etat === 'reserv' ? "En attente de validation" : "Prêt validé",
+                startDate: new Date().toISOString(),
+                endDate: new Date().toISOString(),
+                location: categorie ?? "Bibliothèque",
+              });
+            }
+          }
+          setReservations(mapped);
+        }
+      } catch (error) {
+        console.error("Erreur lors de la récupération des données:", error);
+      } finally {
+        setLoading(false);
+      }
     };
-  });
 
-  const [reservations] = useState<Reservation[]>(mappedReservations);
+    fetchUserAndData();
+  }, [maxLoans]);
+
+  if (loading) {
+    return <LoadingSpinner size="lg" text="Chargement de vos réservations..." />;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -56,25 +93,45 @@ const ReservationsPage: React.FC = () => {
             {reservations.map((reservation) => (
               <li
                 key={reservation.id}
-                className="bg-white p-4 shadow-md rounded-lg flex items-center space-x-4"
+                className="bg-white p-4 shadow-md rounded-xl flex items-center space-x-6 border border-gray-100 hover:border-blue-100 transition-all hover:shadow-lg"
               >
-                <img
-                  src={reservation.coverImage}
-                  alt={reservation.title}
-                  className="w-20 h-28 object-cover rounded"
-                  onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).onerror = null;
-                    (e.currentTarget as HTMLImageElement).src = `https://placehold.co/200x300/1b263b/ffffff?text=Livre`;
-                  }}
-                />
+                <div className="relative">
+                  <img
+                    src={reservation.coverImage}
+                    alt={reservation.title}
+                    className="w-20 h-28 object-cover rounded-lg shadow-sm"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).onerror = null;
+                      (e.currentTarget as HTMLImageElement).src = `https://placehold.co/200x300/1b263b/ffffff?text=Livre`;
+                    }}
+                  />
+                  <div className="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow-md">
+                    {reservation.status === "Prêt validé" ?
+                      <CheckCircle className="text-green-500 w-5 h-5" /> :
+                      <Clock className="text-orange-500 w-5 h-5" />
+                    }
+                  </div>
+                </div>
 
                 <div className="flex-grow">
-                  <h2 className="text-lg font-semibold">{reservation.title}</h2>
-                  <p className="text-gray-600">{reservation.author}</p>
-                  <p className="text-gray-600 text-sm mt-1">
-                    Statut : <span className="font-medium">{reservation.status}</span>
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <h2 className="text-lg font-bold text-gray-900">{reservation.title}</h2>
+                  <p className="text-gray-500 text-sm mb-2">{reservation.author}</p>
+
+                  <div className="flex flex-wrap gap-3">
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1.5 ${reservation.status === "Prêt validé"
+                        ? "bg-green-100 text-green-700"
+                        : "bg-orange-100 text-orange-700"
+                      }`}>
+                      {reservation.status === "Prêt validé" ? <CheckCircle size={12} /> : <Clock size={12} />}
+                      {reservation.status}
+                    </span>
+                    <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs flex items-center gap-1.5">
+                      <Calendar size={12} />
+                      Demande effectuée
+                    </span>
+                  </div>
+
+                  <p className="text-xs text-gray-400 mt-3 italic">
                     Emplacement : {reservation.location}
                   </p>
                 </div>

@@ -4,7 +4,7 @@ export type UserStatus = 'etudiant' | 'enseignant';
 export type UserLevel = 'level1' | 'level2' | 'level3' | 'level4' | 'level5';
 
 export type EtatValue = 'ras' | 'emprunt' | 'reserv' | 'retard';
-export type ReservationEtatValue = 'annuler' | 'reserver';
+export type ReservationEtatValue = 'annuler' | 'reserver' | 'emprunt' | 'refuser';
 export type MessageRecipientType = 'E' | 'R';
 export type NotificationType = 'reservation_confirmed' | 'reservation';
 
@@ -71,6 +71,8 @@ export interface ReservationItem {
     image: string;
     name: string;
     nomBD: string;
+    dateEmprunt?: string; // Ajouté pour correspondre à la logique Admin
+    validatedBy?: string; // Ajouté pour correspondre à la logique Admin
 }
 
 // Type pour la structure des tableaux tabEtat
@@ -119,7 +121,7 @@ export interface UserData {
 
 // Interface BiblioUser mise à jour pour correspondre à UserData
 export interface BiblioUser {
-    id?: string;
+    id: string;
     name: string;
     matricule?: string;
     email: string;
@@ -151,7 +153,7 @@ export interface BiblioUser {
     notifications: NotificationItem[];
     reservations?: ReservationItem[];
     searchHistory: string[];
-    username: string;
+    username?: string;
 }
 
 // Interfaces pour les formulaires (conservées et mises à jour)

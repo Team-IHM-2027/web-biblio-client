@@ -1,7 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { collection, query, orderBy, getDocs } from 'firebase/firestore';
 import { db } from '../../configs/firebase';
 import { useConfig } from '../../contexts/ConfigContext';
+import { useAuth } from '../../contexts/AuthContext';
 import LoadingSpinner from '../common/LoadingSpinner';
 import BookCard, { BiblioBook } from './BookCard';
 import { SortOption, ViewMode } from './BooksSortOptions';
@@ -35,15 +37,16 @@ interface BooksListProps {
 }
 
 const BooksList: React.FC<BooksListProps> = ({
-                                                 searchFilters,
-                                                 selectedDepartments,
-                                                 sortOption,
-                                                 viewMode,
-                                                 onToggleFavorite,
-                                                 favoriteBooks = [],
-                                                 className = ""
-                                             }) => {
+    searchFilters,
+    selectedDepartments,
+    sortOption,
+    viewMode,
+    onToggleFavorite,
+    favoriteBooks = [],
+    className = ""
+}) => {
     const { orgSettings } = useConfig();
+    const { currentUser } = useAuth();
     const [allBooks, setAllBooks] = useState<BiblioBook[]>([]);
     const [filteredBooks, setFilteredBooks] = useState<BiblioBook[]>([]);
     const [loading, setLoading] = useState(true);
@@ -239,11 +242,10 @@ const BooksList: React.FC<BooksListProps> = ({
             </div>
 
             {/* Grille/Liste des livres */}
-            <div className={`${
-                viewMode === 'grid'
-                    ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
-                    : 'space-y-4'
-            }`}>
+            <div className={`${viewMode === 'grid'
+                ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
+                : 'space-y-4'
+                }`}>
                 {currentBooks.map((book) => (
                     <BookCard
                         key={book.id}
@@ -251,6 +253,7 @@ const BooksList: React.FC<BooksListProps> = ({
                         viewMode={viewMode}
                         onToggleFavorite={onToggleFavorite}
                         isFavorite={favoriteBooks.includes(book.id)}
+                        userLoggedIn={!!currentUser}
                     />
                 ))}
             </div>
@@ -264,25 +267,23 @@ const BooksList: React.FC<BooksListProps> = ({
                         <button
                             onClick={handlePreviousPage}
                             disabled={currentPage === totalPages}
-                            className={`p-3 transition-colors ${
-                                currentPage === totalPages
-                                    ? 'text-gray-300 cursor-not-allowed'
-                                    : 'text-gray-600 hover:bg-gray-50'
-                            }`}
+                            className={`p-3 transition-colors ${currentPage === totalPages
+                                ? 'text-gray-300 cursor-not-allowed'
+                                : 'text-gray-600 hover:bg-gray-50'
+                                }`}
                         >
-                            <ChevronLeft className="w-5 h-5"/>
+                            <ChevronLeft className="w-5 h-5" />
                         </button>
 
                         <button
                             onClick={handleNextPage}
                             disabled={currentPage === totalPages}
-                            className={`p-3 transition-colors ${
-                                currentPage === totalPages
-                                    ? 'text-gray-300 cursor-not-allowed'
-                                    : 'text-gray-600 hover:bg-gray-50'
-                            }`}
+                            className={`p-3 transition-colors ${currentPage === totalPages
+                                ? 'text-gray-300 cursor-not-allowed'
+                                : 'text-gray-600 hover:bg-gray-50'
+                                }`}
                         >
-                            <ChevronRight className="w-5 h-5"/>
+                            <ChevronRight className="w-5 h-5" />
                         </button>
 
                     </div>

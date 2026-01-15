@@ -1,7 +1,8 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react'; // Added useEffect
 import { useConfig } from '../contexts/ConfigContext';
-
-// Import de VOS composants existants
+import { reservationService } from '../services/reservationService';
+import { notificationService } from '../services/notificationService';
+import { useAuth } from '../contexts/AuthContext';
 import DepartmentFilter from '../components/common/DepartmentFilter.tsx';
 import AdvancedSearchBar from '../components/books/AdvancedSearchBar';
 import BooksSortOptions, { SortOption, ViewMode } from '../components/books/BooksSortOptions';
@@ -23,6 +24,7 @@ interface SearchFilters {
 
 const BooksPage: React.FC = () => {
     const { orgSettings } = useConfig();
+    const { currentUser } = useAuth(); // Moved up for better organization
 
     const [searchFilters, setSearchFilters] = useState<SearchFilters>({
         query: '',
@@ -60,21 +62,7 @@ const BooksPage: React.FC = () => {
         setViewMode(mode);
     }, []);
 
-    const handleBookReserve = useCallback(async (bookId: string) => {
-        try {
-            console.log('📚 Réservation du livre:', bookId);
-            // TODO: Implémenter la logique de réservation avec votre service
-            // await reservationService.reserveBook(bookId);
-
-            // Simuler un délai
-            await new Promise(resolve => setTimeout(resolve, 1000));
-
-            alert('Livre réservé avec succès !');
-        } catch {
-            alert('Erreur lors de la réservation. Veuillez réessayer.');
-        }
-    }, []);
-
+    
     // Gestion des favoris
     const handleToggleFavorite = useCallback((bookId: string) => {
         setFavoriteBooks(prev => {
@@ -85,6 +73,73 @@ const BooksPage: React.FC = () => {
             return newFavorites;
         });
     }, []);
+
+    // Écouter les notifications de réservation
+    useEffect(() => {
+        if (currentUser?.id) { // Check if currentUser has id
+            const unsubscribe = notificationService.subscribeToUserNotifications(
+                currentUser.id,
+                (notifications) => {
+                    notifications.forEach(notification => {
+                        if (!notification.read && notification.type === 'reservation_update') {
+                            // Afficher l'alerte
+                            if (notification.data?.status === 'approved') {
+                                alert(`🎉 ${notification.title}\n${notification.message}`);
+                            } else {
+                                alert(`❌ ${notification.title}\n${notification.message}`);
+                            }
+                            
+                            // Marquer comme lue
+                            notificationService.markAsRead(notification.id);
+                        }
+                    });
+                }
+            );
+            
+            return () => unsubscribe();
+        }
+    }, [currentUser]);
+
+    // REMOVED THE DUPLICATE handleBookReserve FUNCTION
+    // KEEP ONLY THIS ONE:
+    const handleBookReserve = useCallback(async (bookId: string) => {
+        try {
+            if (!currentUser) {
+                alert('Veuillez vous connecter pour réserver un livre');
+                return;
+            }
+
+            // Validate user data
+            const userName = currentUser.name || currentUser.username || 'Utilisateur';
+            const userEmail = currentUser.email;
+            
+            if (!userEmail) {
+                alert('Votre profil ne contient pas d\'email. Veuillez mettre à jour votre profil.');
+                return;
+            }
+
+            const confirmed = window.confirm(
+                'Voulez-vous vraiment réserver ce livre ?\n\n' +
+                'Un bibliothécaire devra valider votre réservation.'
+            );
+            
+            if (!confirmed) return;
+
+            const result = await reservationService.reserveBook(bookId, currentUser);
+            
+            if (result.success) {
+                alert('✅ ' + result.message);
+                
+                // Refresh the page or update UI if needed
+                // You might want to trigger a refresh of the book list here
+            } else {
+                alert('❌ ' + result.message);
+            }
+        } catch (error: any) {
+            console.error('Reservation error:', error);
+            alert('❌ Erreur lors de la réservation. Veuillez réessayer.');
+        }
+    }, [currentUser]);
 
     return (
         <div className="min-h-screen bg-gray-50">

@@ -1,7 +1,7 @@
 // SidebarItem.jsx
 import { NavLink } from 'react-router-dom';
 
-const SidebarItem = ({ item, collapsed }) => {
+const SidebarItem = ({ item, collapsed }: { item: any; collapsed: any }) => {
   return (
     <li className="mb-1 px-2">
       <NavLink 
