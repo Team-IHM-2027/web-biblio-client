@@ -16,6 +16,7 @@ import BooksPage from "./pages/BooksPage.tsx";
 import ThesisPage from "./pages/ThesisPage.tsx";
 import ThesisDetailsPage from "./pages/ThesisDetailsPage.tsx";
 import AidePage from "./pages/AidePage.tsx";
+import ClientAlertModal from './components/common/ClientAlertModal';
 
 const router = createBrowserRouter([
     {
@@ -88,6 +89,7 @@ function App() {
     return (
         <ConfigProvider>
             <RouterProvider router={router} />
+            <ClientAlertModal />
             {/*<DebugConfig />*/}
         </ConfigProvider>
     );
