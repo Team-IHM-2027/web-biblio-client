@@ -1,5 +1,5 @@
 // src/pages/dashboard/HistoryPage.tsx
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { historyService, HistoryEvent } from '../../services/historyService';
 import { authService } from '../../services/auth/authService';
