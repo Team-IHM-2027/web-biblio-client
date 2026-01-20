@@ -1,29 +1,31 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { AssistantApi } from '../../services/api/AssistantApi';
+import { useAuth } from '../../contexts/AuthContext';
+import { chatService } from '../../services/chat/chatService';
 import './ChatAssistant.css';
 
 // Icônes
 const ChatIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
+    <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z" />
   </svg>
 );
 
 const CloseIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
   </svg>
 );
 
 const SendIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
   </svg>
 );
 
 const MinimizeIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M19 13H5v-2h14v2z"/>
+    <path d="M19 13H5v-2h14v2z" />
   </svg>
 );
 
@@ -55,24 +57,26 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
   orgName = 'OrgSettings',
   apiUrl,
 }) => {
+  const { currentUser } = useAuth() || {};
+
   const [assistantApi] = useState(() => {
     return new AssistantApi(apiUrl);
   });
-  
+
   const [isOpen, setIsOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [quickSuggestions, setQuickSuggestions] = useState<Array<{text: string, query: string}>>([]);
+  const [quickSuggestions, setQuickSuggestions] = useState<Array<{ text: string, query: string }>>([]);
   const [libraryName, setLibraryName] = useState('Bibliothèque');
   const [apiAvailable, setApiAvailable] = useState(true);
-  
+
   // Book search state
   const [bookSearchStep, setBookSearchStep] = useState<'title' | 'author' | null>(null);
   const [bookTitle, setBookTitle] = useState('');
-  
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -83,12 +87,12 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
       try {
         const isHealthy = await assistantApi.checkHealth();
         setApiAvailable(isHealthy);
-        
+
         if (isHealthy) {
           const libraryInfo = await assistantApi.getLibraryInfo(orgName);
           if (libraryInfo) {
             setLibraryName(libraryInfo.name);
-            
+
             if (messages.length === 0 && isOpen) {
               setMessages([{
                 id: 'welcome',
@@ -98,7 +102,7 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
               }]);
             }
           }
-          
+
           const suggestions = await assistantApi.getQuickSuggestions(orgName);
           setQuickSuggestions(suggestions);
         } else {
@@ -121,7 +125,7 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
         ]);
       }
     };
-    
+
     if (isOpen) {
       initializeChatbot();
     }
@@ -152,18 +156,61 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
     }
   }, [isOpen, isMinimized]);
 
-  // Message de bienvenue
+  // Synchronisation avec Firestore et WebSockets
   useEffect(() => {
-    if (isOpen && messages.length === 0) {
-      const welcomeMsg: Message = {
-        id: 'welcome',
-        content: welcomeMessage,
-        sender: 'assistant',
-        timestamp: new Date(),
-      };
-      setMessages([welcomeMsg]);
+    if (!currentUser) return;
+
+    let unsubscribe: (() => void) | undefined;
+
+    const setupChat = async () => {
+      // 1. Connexion WebSocket pour le chat en temps réel avec l'admin
+      chatService.connectWebSocket(currentUser.email, (text) => {
+        chatService.receiveMessage(currentUser.id, currentUser.email, text);
+      });
+
+      // 2. Souscription aux messages Firestore
+      unsubscribe = await chatService.subscribeToMessages(
+        currentUser.id,
+        currentUser.email,
+        (fireMessages) => {
+          const mappedMessages: Message[] = fireMessages
+            .filter(msg => msg.type === 'bot')
+            .map(msg => ({
+              id: msg.id || Math.random().toString(36).substr(2, 9),
+              content: msg.texte,
+              sender: msg.recue === 'E' ? 'user' : 'assistant',
+              timestamp: (msg.heure as any)?.toDate ? (msg.heure as any).toDate() : new Date((msg.heure as any))
+            }));
+
+          // Si pas de messages, ajouter le message de bienvenue
+          if (mappedMessages.length === 0) {
+            setMessages([{
+              id: 'welcome',
+              content: welcomeMessage,
+              sender: 'assistant',
+              timestamp: new Date(),
+            }]);
+          } else {
+            setMessages(mappedMessages);
+          }
+        }
+      );
+    };
+
+    setupChat();
+
+    return () => {
+      chatService.disconnect();
+      if (unsubscribe) unsubscribe();
+    };
+  }, [currentUser, welcomeMessage]);
+
+  // Marquage comme lu à l'ouverture du chat
+  useEffect(() => {
+    if (isOpen && currentUser) {
+      chatService.markAsRead(currentUser.id, currentUser.email);
     }
-  }, [isOpen, welcomeMessage]);
+  }, [isOpen, currentUser]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -184,7 +231,7 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
       setBookTitle(message);
       setBookSearchStep('author');
       setInputValue('');
-      
+
       // Ask for author
       const authorPrompt: Message = {
         id: Date.now().toString(),
@@ -195,11 +242,11 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
       setMessages(prev => [...prev, authorPrompt]);
       return;
     }
-    
+
     if (bookSearchStep === 'author') {
       // User entered author
       const author = message.toLowerCase() === 'non' ? '' : message;
-      
+
       // Add user message
       let userQueryText;
       if (author) {
@@ -207,18 +254,18 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
       } else {
         userQueryText = `Recherche du livre "${bookTitle}"`;
       }
-      
+
       const userMessage: Message = {
         id: Date.now().toString(),
         content: userQueryText,
         sender: 'user',
         timestamp: new Date(),
       };
-      
+
       setMessages(prev => [...prev, userMessage]);
       setInputValue('');
       setIsLoading(true);
-      
+
       // Typing indicator
       const typingMessage: Message = {
         id: 'typing',
@@ -227,54 +274,56 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
         timestamp: new Date(),
         isTyping: true,
       };
-      
+
       setMessages(prev => [...prev, typingMessage]);
-      
+
       try {
         if (!apiAvailable || offlineMode) {
           throw new Error('API non disponible');
         }
-        
+
         // Use the direct method to avoid parsing issues
         const response = await assistantApi.checkBookAvailabilityDirect(bookTitle, author || undefined);
-        
+
         // Remove typing indicator
         setMessages(prev => prev.filter(msg => msg.id !== 'typing'));
-        
+
         const assistantMessage: Message = {
           id: (Date.now() + 1).toString(),
           content: response,
           sender: 'assistant',
           timestamp: new Date(),
         };
-        
+
         setMessages(prev => [...prev, assistantMessage]);
       } catch (error) {
         console.error('Erreur lors de la recherche de livre:', error);
-        
+
         // Remove typing indicator
         setMessages(prev => prev.filter(msg => msg.id !== 'typing'));
-        
+
         let errorMessage: Message = {
           id: (Date.now() + 1).toString(),
           content: "Désolé, je n'ai pas pu rechercher le livre. Veuillez réessayer ou contacter la bibliothèque.",
           sender: 'assistant',
           timestamp: new Date(),
         };
-        
+
         setMessages(prev => [...prev, errorMessage]);
       } finally {
         setIsLoading(false);
         resetBookSearch();
       }
-      
+
       return;
     }
 
-    // Regular message handling
+    const userMessageContent = message;
+
+    // Add user message to UI immediately for responsiveness (Firestore will update it soon)
     const userMessage: Message = {
       id: Date.now().toString(),
-      content: message,
+      content: userMessageContent,
       sender: 'user',
       timestamp: new Date(),
     };
@@ -283,53 +332,54 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
     setInputValue('');
     setIsLoading(true);
 
-    // Typing indicator
-    const typingMessage: Message = {
-      id: 'typing',
-      content: '...',
-      sender: 'assistant',
-      timestamp: new Date(),
-      isTyping: true,
-    };
-
-    setMessages(prev => [...prev, typingMessage]);
-
     try {
+      // 1. Send to Firestore & WebSocket
+      if (currentUser) {
+        await chatService.sendMessage(currentUser.id, currentUser.email, userMessageContent);
+      }
+
       if (!apiAvailable || offlineMode) {
         throw new Error('API non disponible');
       }
 
-      const response = await assistantApi.getAssistantResponse(message, orgName);
-      
+      // Typing indicator for Bot
+      const typingMessage: Message = {
+        id: 'typing',
+        content: '...',
+        sender: 'assistant',
+        timestamp: new Date(),
+        isTyping: true,
+      };
+      setMessages(prev => [...prev, typingMessage]);
+
+      // 2. Bot Response
+      const response = await assistantApi.getAssistantResponse(userMessageContent, orgName);
+
       // Remove typing indicator
       setMessages(prev => prev.filter(msg => msg.id !== 'typing'));
 
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        content: response,
-        sender: 'assistant',
-        timestamp: new Date(),
-      };
+      // 3. Save Bot Response to Firestore
+      if (currentUser) {
+        await chatService.receiveMessage(currentUser.id, currentUser.email, response);
+      }
 
-      setMessages(prev => [...prev, assistantMessage]);
-      
-      // Check if we should start book search
+      // Update check logic...
       const lowerMessage = message.toLowerCase();
-      const isBookQuery = lowerMessage.includes('chercher') || 
-                         lowerMessage.includes('rechercher') ||
-                         (lowerMessage.includes('livre') && !lowerMessage.includes('"'));
-      
+      const isBookQuery = lowerMessage.includes('chercher') ||
+        lowerMessage.includes('rechercher') ||
+        (lowerMessage.includes('livre') && !lowerMessage.includes('"'));
+
       // Check if response indicates we need more info
       const lowerResponse = response.toLowerCase();
-      const needsMoreInfo = lowerResponse.includes('fournir') || 
-                           lowerResponse.includes('titre') ||
-                           lowerResponse.includes('veuillez') ||
-                           lowerResponse.includes('exemple');
-      
+      const needsMoreInfo = lowerResponse.includes('fournir') ||
+        lowerResponse.includes('titre') ||
+        lowerResponse.includes('veuillez') ||
+        lowerResponse.includes('exemple');
+
       if (isBookQuery && needsMoreInfo) {
         // Start step-by-step book search
         setBookSearchStep('title');
-        
+
         const titlePrompt: Message = {
           id: (Date.now() + 2).toString(),
           content: "Pour rechercher un livre, donnez-moi d'abord le titre :",
@@ -340,15 +390,15 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
       } else {
         resetBookSearch();
       }
-      
+
     } catch (error) {
       console.error('Erreur lors de l\'envoi du message :', error);
-      
+
       // Remove typing indicator
       setMessages(prev => prev.filter(msg => msg.id !== 'typing'));
-      
+
       let errorMessage: Message;
-      
+
       if (offlineMode) {
         errorMessage = {
           id: (Date.now() + 1).toString(),
@@ -359,7 +409,7 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
       } else if (!apiAvailable) {
         const lowerMessage = message.toLowerCase();
         let fallbackResponse = "Je comprends votre question. Pour des informations précises, veuillez contacter la bibliothèque directement.";
-        
+
         if (lowerMessage.includes('heure') || lowerMessage.includes('horaires')) {
           fallbackResponse = "🕐 Horaires standards:\nLundi-Vendredi: 9h-18h\nSamedi: 10h-17h\nDimanche: Fermé\n\nVeuillez contacter la bibliothèque pour les horaires exacts.";
         } else if (lowerMessage.includes('contact')) {
@@ -369,7 +419,7 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
         } else if (lowerMessage.includes('livre')) {
           fallbackResponse = "🔍 Pour rechercher un livre, veuillez contacter directement la bibliothèque ou consulter le catalogue en ligne.";
         }
-        
+
         errorMessage = {
           id: (Date.now() + 1).toString(),
           content: fallbackResponse,
@@ -384,7 +434,7 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
           timestamp: new Date(),
         };
       }
-      
+
       setMessages(prev => [...prev, errorMessage]);
       resetBookSearch();
     } finally {
@@ -397,18 +447,6 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
       e.preventDefault();
       handleSendMessage();
     }
-  };
-
-  const handleClearChat = () => {
-    setMessages([]);
-    resetBookSearch();
-    const welcomeMsg: Message = {
-      id: 'welcome',
-      content: `Bonjour! Je suis l'assistant de ${libraryName}. Comment puis-je vous aider ?`,
-      sender: 'assistant',
-      timestamp: new Date(),
-    };
-    setMessages([welcomeMsg]);
   };
 
   const handleCloseChat = () => {
@@ -436,9 +474,9 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
   };
 
   const formatTime = (date: Date): string => {
-    return date.toLocaleTimeString('fr-FR', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
+    return date.toLocaleTimeString('fr-FR', {
+      hour: '2-digit',
+      minute: '2-digit'
     });
   };
 
@@ -446,7 +484,7 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
     if (suggestion.text.includes("🔍")) {
       // For book search, start the step-by-step process
       resetBookSearch(); // Clear any existing state
-      
+
       // Add a prompt message
       const promptMessage: Message = {
         id: Date.now().toString(),
@@ -455,11 +493,11 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, promptMessage]);
-      
+
       // Set book search step AFTER clearing input
       setBookSearchStep('title');
       setInputValue(''); // Ensure input is clear
-      
+
       // Focus the input field with a slight delay
       setTimeout(() => {
         if (inputRef.current) {
@@ -470,7 +508,7 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
       // For other suggestions, just set the query
       setInputValue(suggestion.query);
       resetBookSearch();
-      
+
       // Focus immediately for other suggestions
       if (inputRef.current) {
         inputRef.current.focus();
@@ -485,7 +523,7 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
   };
 
   return (
-    <div 
+    <div
       className={`chat-assistant ${getPositionClasses()} ${isOpen ? 'open' : ''} ${isHovered ? 'hovered' : ''}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -496,7 +534,7 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
     >
       {/* Bouton de bascule */}
       {!isOpen && (
-        <button 
+        <button
           className="chat-toggle-button"
           onClick={() => setIsOpen(true)}
           aria-label="Ouvrir l'assistant de chat"
@@ -528,14 +566,14 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
               </div>
             </div>
             <div className="header-actions">
-              <button 
+              <button
                 className="icon-button minimize-btn"
                 onClick={toggleMinimize}
                 aria-label={isMinimized ? "Agrandir" : "Réduire"}
               >
                 <MinimizeIcon />
               </button>
-              <button 
+              <button
                 className="icon-button close-btn"
                 onClick={handleCloseChat}
                 aria-label="Fermer"
@@ -577,7 +615,7 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
                 {/* Suggestions rapides */}
                 <div className="quick-actions">
                   {quickSuggestions.map((suggestion, index) => (
-                    <button 
+                    <button
                       key={index}
                       className="quick-action-btn"
                       onClick={() => handleQuickSuggestion(suggestion)}
@@ -603,11 +641,11 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
                   onChange={handleInputChange}
                   onKeyPress={handleKeyPress}
                   placeholder={
-                    bookSearchStep === 'title' 
-                      ? "Ex: Le Petit Prince" 
+                    bookSearchStep === 'title'
+                      ? "Ex: Le Petit Prince"
                       : bookSearchStep === 'author'
-                      ? "Ex: Antoine de Saint-Exupéry (ou tapez 'non')"
-                      : "Tapez votre question ici..."
+                        ? "Ex: Antoine de Saint-Exupéry (ou tapez 'non')"
+                        : "Tapez votre question ici..."
                   }
                   disabled={isLoading}
                 />
@@ -627,7 +665,7 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
           {isMinimized && (
             <div className="minimized-view">
               <span>Assistant {libraryName}</span>
-              <button 
+              <button
                 className="restore-btn"
                 onClick={toggleMinimize}
                 aria-label="Agrandir"

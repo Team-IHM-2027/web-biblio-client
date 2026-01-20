@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
-import { auth } from '../configs/firebase';
+import { onSnapshot, doc, getDoc } from 'firebase/firestore';
+import { auth, db } from '../configs/firebase';
 import { authService } from '../services/auth/authService';
 import { BiblioUser } from '../types/auth';
 
@@ -28,46 +29,122 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    let unsubscribeSnapshot: (() => void) | undefined;
+
+    const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
       setFirebaseUser(user);
-      
+
       if (user) {
         try {
-          const biblioUser = await authService.getCurrentUser();
-          setCurrentUser(biblioUser);
-          
-          // Initialize WebSocket connection for user
-          if (biblioUser) {
-            // We'll initialize WebSocket here, but need to handle it properly
-            // to avoid multiple connections
+          // Resolve the correct user document (Email first, then UID fallback)
+          let userDocRef = doc(db, 'BiblioUser', user.email!);
+          let userDocSnap = await getDoc(userDocRef);
+
+          if (!userDocSnap.exists()) {
+            userDocRef = doc(db, 'BiblioUser', user.uid);
+            userDocSnap = await getDoc(userDocRef);
           }
+
+          if (userDocSnap.exists()) {
+            // Setup real-time listener for user data using the resolved reference
+            unsubscribeSnapshot = onSnapshot(userDocRef, (snapshot) => {
+              if (snapshot.exists()) {
+                const biblioUser = { ...snapshot.data() as BiblioUser, id: user.uid };
+
+                // ⭐ CHECK IF USER IS BLOCKED
+                if (biblioUser.etat === 'bloc') {
+                  console.warn('⚠️ User is blocked, forcing logout and redirection');
+
+                  // Store blocking info for UI
+                  localStorage.setItem('userBlockStatus', JSON.stringify({
+                    isBlocked: true,
+                    reason: biblioUser.blockedReason || 'Violation des règles de la bibliothèque',
+                    blockedAt: biblioUser.blockedAt && (biblioUser.blockedAt as any).toDate
+                      ? (biblioUser.blockedAt as any).toDate().toISOString()
+                      : biblioUser.blockedAt
+                  }));
+
+                  setCurrentUser(null);
+                  auth.signOut();
+
+                  if (window.location.pathname !== '/blocked' && window.location.pathname !== '/auth') {
+                    window.location.href = '/blocked';
+                  }
+                  return;
+                }
+
+                setCurrentUser(biblioUser);
+                localStorage.removeItem('userBlockStatus');
+              } else {
+                setCurrentUser(null);
+              }
+            }, (err) => {
+              console.error('Firestore snapshot error:', err);
+            });
+          } else {
+            console.warn('❌ User document not found in BiblioUser collection');
+            setCurrentUser(null);
+          }
+
         } catch (err) {
           console.error('Error loading user data:', err);
           setCurrentUser(null);
         }
       } else {
         setCurrentUser(null);
+        if (unsubscribeSnapshot) {
+          unsubscribeSnapshot();
+          unsubscribeSnapshot = undefined;
+        }
       }
-      
+
       setIsLoading(false);
     });
 
-    return unsubscribe;
+    return () => {
+      unsubscribeAuth();
+      if (unsubscribeSnapshot) unsubscribeSnapshot();
+    };
   }, []);
 
   const handleSignIn = async (email: string, password: string) => {
     try {
       setIsLoading(true);
       setError(null);
-      const result = await authService.signIn({ email, password, rememberMe: false});
-      
+      const result = await authService.signIn({ email, password, rememberMe: false });
+
       if (result.success && result.user) {
+        // ⭐ IMMEDIATELY CHECK IF USER IS BLOCKED AFTER LOGIN
+        if (result.user.etat === 'bloc') {
+          // Log out immediately
+          await auth.signOut();
+          setCurrentUser(null);
+
+          // Store blocking info
+          localStorage.setItem('userBlockStatus', JSON.stringify({
+            isBlocked: true,
+            reason: result.user.blockedReason || 'Violation des règles de la bibliothèque',
+            blockedAt: result.user.blockedAt && (result.user.blockedAt as any).toDate
+              ? (result.user.blockedAt as any).toDate().toISOString()
+              : result.user.blockedAt
+          }));
+
+          throw new Error(`Votre compte est bloqué. Raison: ${result.user.blockedReason || 'Violation des règles de la bibliothèque'}`);
+        }
+
         setCurrentUser(result.user);
+        localStorage.removeItem('userBlockStatus');
       } else {
         throw new Error(result.message);
       }
     } catch (err: any) {
-      setError(err.message);
+      // If it's a blocking error, keep the error message
+      if (err.message.includes('bloqué')) {
+        setError(err.message);
+      } else {
+        // For other errors, use generic message
+        setError(err.message || 'Erreur de connexion');
+      }
       throw err;
     } finally {
       setIsLoading(false);
@@ -79,7 +156,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsLoading(true);
       setError(null);
       const result = await authService.signUp(data);
-      
+
       if (!result.success) {
         throw new Error(result.message);
       }
@@ -96,6 +173,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsLoading(true);
       await authService.signOut();
       setCurrentUser(null);
+      localStorage.removeItem('userBlockStatus'); // Clear blocking info on logout
       // Clean up WebSocket connection
     } catch (err: any) {
       setError(err.message);
@@ -138,7 +216,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    // Return a default context instead of throwing error
+    console.warn('useAuth used outside AuthProvider, returning default context');
+    return {
+      currentUser: null,
+      firebaseUser: null,
+      isLoading: false,
+      error: null,
+      signIn: async () => { throw new Error('AuthProvider not available'); },
+      signUp: async () => { throw new Error('AuthProvider not available'); },
+      signOut: async () => { throw new Error('AuthProvider not available'); },
+      updateProfile: async () => { throw new Error('AuthProvider not available'); },
+    };
   }
   return context;
 };

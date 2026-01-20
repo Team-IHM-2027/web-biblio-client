@@ -1,26 +1,28 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useConfig } from '../contexts/ConfigContext';
 import { authService } from '../services/auth/authService';
 import { BiblioUser } from '../types/auth';
 import { Timestamp, doc, updateDoc, arrayUnion, getDoc } from 'firebase/firestore';
 import { db } from '../configs/firebase';
+import { getRandomDefaultAvatar } from '../utils/userUtils';
 
 // Import des composants
 import BookHeader from '../components/books/BookHeader';
 import BookDescription from '../components/books/BookDescription';
-import CommentsSection from '../components/common/CommentsSection.tsx';
-import CommentModal from '../components/common/CommentModal.tsx';
+import CommentsSection from '../components/common/CommentsSection';
+import CommentModal from '../components/common/CommentModal';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { historyService } from '../services/historyService'; // Ajoutez cet import
 
 // Import des interfaces depuis BookCard
 import { BiblioBook, Comment, CommentWithUserData } from '../components/books/BookCard';
-import Footer from "../components/layout/Footer.tsx";
+import Footer from "../components/layout/Footer";
 
 const BookDetailsPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const location = useLocation();
     const { orgSettings } = useConfig();
 
     // États principaux
@@ -60,16 +62,16 @@ const BookDetailsPage: React.FC = () => {
     // Fonction pour récupérer les données utilisateur d'un commentaire
     const getUserDataForComment = async (nomUser: string): Promise<{ userName: string; userAvatar?: string }> => {
         try {
-            // Si nomUser correspond à un nom d'utilisateur, essayez de récupérer l'avatar
-            // Ici vous pourriez faire une requête pour chercher l'utilisateur par nom
-            // Pour l'instant, on retourne juste le nomUser
             return {
                 userName: nomUser || 'Utilisateur anonyme',
-                userAvatar: undefined // Vous pouvez implémenter la logique pour récupérer l'avatar
+                userAvatar: getRandomDefaultAvatar(nomUser)
             };
         } catch (error) {
             console.error('Erreur récupération données utilisateur:', error);
-            return { userName: nomUser || 'Utilisateur anonyme' };
+            return {
+                userName: nomUser || 'Utilisateur anonyme',
+                userAvatar: getRandomDefaultAvatar(nomUser)
+            };
         }
     };
 
@@ -146,24 +148,24 @@ const BookDetailsPage: React.FC = () => {
 
     // Dans BookDetailsPage.tsx
 
-// ... dans le composant BookDetailsPage, après les autres hooks ...
+    // ... dans le composant BookDetailsPage, après les autres hooks ...
 
-useEffect(() => {
-    // Enregistre la consultation dans l'historique si l'utilisateur est connecté
-    if (isAuthenticated && currentUser && book) {
-        historyService.addHistoryEvent({
-            userId: currentUser.id,
-            type: 'book_view',
-            itemId: book.id,
-            itemTitle: book.name,
-            itemCoverUrl: book.image,
-        });
-    }
-}, [isAuthenticated, currentUser, book]); // Se déclenche une fois que tout est chargé
+    useEffect(() => {
+        // Enregistre la consultation dans l'historique si l'utilisateur est connecté
+        if (isAuthenticated && currentUser && book) {
+            historyService.addHistoryEvent({
+                userId: currentUser.id,
+                type: 'book_view',
+                itemId: book.id,
+                itemTitle: book.name,
+                itemCoverUrl: book.image,
+            });
+        }
+    }, [isAuthenticated, currentUser, book]); // Se déclenche une fois que tout est chargé
     // Gestion de la réservation
     const handleReserve = async () => {
         if (!isAuthenticated) {
-            navigate('/auth');
+            navigate('/auth', { state: { from: location } });
             return;
         }
 
@@ -175,7 +177,7 @@ useEffect(() => {
 
         try {
             // Mettre à jour le nombre d'exemplaires dans Firestore
-            const bookRef = doc(db, 'BiblioBook', book.id);
+            const bookRef = doc(db, 'BiblioBooks', book.id);
             await updateDoc(bookRef, {
                 exemplaire: book.exemplaire - 1
             });
@@ -199,7 +201,7 @@ useEffect(() => {
     // Gestion des favoris
     const handleToggleFavorite = async () => {
         if (!isAuthenticated) {
-            navigate('/auth');
+            navigate('/auth', { state: { from: location } });
             return;
         }
 
@@ -248,7 +250,7 @@ useEffect(() => {
                 id: `comment_new_${Date.now()}`,
                 userId: currentUser.id || '',
                 userName: currentUser.name,
-                userAvatar: currentUser.profilePicture,
+                userAvatar: currentUser.profilePicture || currentUser.imageUri || getRandomDefaultAvatar(currentUser.id),
                 helpful: 0
             };
 
@@ -347,7 +349,7 @@ useEffect(() => {
             </div>
         );
     }
-    
+
 
     return (
         <div className="min-h-screen bg-gray-50">

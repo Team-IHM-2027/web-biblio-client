@@ -50,6 +50,7 @@ export interface MessageItem {
     recue: MessageRecipientType;
     texte: string;
     id?: string;
+    type?: 'admin' | 'bot';
 }
 
 // Interface pour les éléments dans notifications
@@ -136,6 +137,9 @@ export interface BiblioUser {
     tabEtat3?: TabEtatEntry | null;
     tabEtat4?: TabEtatEntry | null;
     tabEtat5?: TabEtatEntry | null;
+    etat?: 'bloc' | 'ras';
+    blockedReason?: string;
+    blockedAt?: string;
     etat1?: EtatValue;
     etat2?: EtatValue;
     etat3?: EtatValue;

@@ -13,27 +13,39 @@ const NotificationsPage = () => {
 
     useEffect(() => {
         const fetchNotifications = async () => {
-            const user = await authService.getCurrentUser();
-            if (user && user.id) {
-                const userNotifications = await notificationService.getNotificationsForUser(user.id);
-                setNotifications(userNotifications);
+            try {
+                const user = await authService.getCurrentUser();
+                if (user && user.id) {
+                    const userNotifications = await notificationService.getUnifiedNotifications(user.id);
+                    setNotifications(userNotifications);
+                }
+            } catch (error) {
+                console.error("Error fetching notifications:", error);
+            } finally {
+                setLoading(false);
             }
-            setLoading(false);
         };
         fetchNotifications();
     }, []);
 
     const handleMarkAsRead = async (id: string) => {
-        await notificationService.markAsRead(id);
-        setNotifications(prev =>
-            prev.map(n => (n.id === id ? { ...n, read: true } : n))
-        );
+        const user = await authService.getCurrentUser();
+        if (user && user.id) {
+            // Try collection first
+            await notificationService.markAsRead(id);
+            // And document
+            await notificationService.markUserNotificationAsRead(user.id, id);
+
+            setNotifications(prev =>
+                prev.map(n => (n.id === id ? { ...n, read: true } : n))
+            );
+        }
     };
 
     const handleMarkAllAsRead = async () => {
         const user = await authService.getCurrentUser();
         if (user && user.id) {
-            await notificationService.markAllAsRead(user.id);
+            await notificationService.markEverythingAsRead(user.id);
             setNotifications(prev => prev.map(n => ({ ...n, read: true })));
         }
     };
@@ -57,7 +69,7 @@ const NotificationsPage = () => {
                     Marquer tout comme lu
                 </button>
             </div>
-            
+
             <div className="bg-white rounded-2xl shadow-lg">
                 {notifications.length > 0 ? (
                     <ul className="divide-y divide-gray-200">
@@ -80,12 +92,18 @@ const NotificationsPage = () => {
 // Composant pour un item de notification
 const NotificationItem = ({ notification, onMarkAsRead }: { notification: Notification, onMarkAsRead: (id: string) => void }) => {
     const navigate = useNavigate();
-    
-    const icons = {
+
+    const icons: Record<string, React.ReactElement> = {
         success: <CheckCircle className="text-green-500" />,
         reminder: <Bell className="text-yellow-500" />,
         alert: <AlertTriangle className="text-red-500" />,
         info: <Info className="text-blue-500" />,
+        reservation: <Bell className="text-orange-500" />,
+        reservation_update: <Info className="text-indigo-500" />,
+        loan_validated: <CheckCircle className="text-green-600" />,
+        loan_returned: <CheckCircle className="text-blue-600" />,
+        penalty: <AlertTriangle className="text-red-600" />,
+        error: <AlertTriangle className="text-red-500" />,
     };
 
     const handleClick = () => {
@@ -96,16 +114,22 @@ const NotificationItem = ({ notification, onMarkAsRead }: { notification: Notifi
             navigate(notification.link);
         }
     };
-    
+
+    const formatTimestamp = (ts: any) => {
+        if (!ts) return '';
+        if (typeof ts.toDate === 'function') return ts.toDate().toLocaleString('fr-FR');
+        if (ts instanceof Date) return ts.toLocaleString('fr-FR');
+        return new Date(ts).toLocaleString('fr-FR');
+    };
+
     return (
         <li
             onClick={handleClick}
-            className={`flex items-start gap-4 p-6 transition-all duration-300 cursor-pointer ${
-                notification.read ? 'bg-white' : 'bg-primary/5 hover:bg-primary/10'
-            }`}
+            className={`flex items-start gap-4 p-6 transition-all duration-300 cursor-pointer ${notification.read ? 'bg-white' : 'bg-primary/5 hover:bg-primary/10'
+                }`}
         >
             <div className="w-10 h-10 bg-gray-100 rounded-full flex-shrink-0 flex items-center justify-center mt-1">
-                {icons[notification.type]}
+                {icons[notification.type] || <Info className="text-blue-500" />}
             </div>
             <div className="flex-1">
                 <div className="flex justify-between items-center">
@@ -116,7 +140,7 @@ const NotificationItem = ({ notification, onMarkAsRead }: { notification: Notifi
                 </div>
                 <p className="text-gray-600 text-sm mt-1">{notification.message}</p>
                 <span className="text-xs text-gray-400 mt-2 block">
-                    {notification.timestamp.toDate().toLocaleString('fr-FR')}
+                    {formatTimestamp(notification.timestamp)}
                 </span>
             </div>
             <button className="text-gray-400 hover:text-red-500 p-2 opacity-0 group-hover:opacity-100 transition-opacity">

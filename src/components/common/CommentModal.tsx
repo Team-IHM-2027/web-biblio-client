@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useConfig } from '../../contexts/ConfigContext.tsx';
+import { useConfig } from '../../contexts/ConfigContext';
 import { X, Star, Send, AlertCircle } from 'lucide-react';
 
 interface CommentModalProps {
@@ -13,14 +13,14 @@ interface CommentModalProps {
 }
 
 const CommentModal: React.FC<CommentModalProps> = ({
-                                                       isOpen,
-                                                       onClose,
-                                                       onSubmit,
-                                                       bookTitle,
-                                                       isAuthenticated,
-                                                       onLoginRequired,
-                                                       currentUserName = ''
-                                                   }) => {
+    isOpen,
+    onClose,
+    onSubmit,
+    bookTitle,
+    isAuthenticated,
+    onLoginRequired,
+    currentUserName = ''
+}) => {
     const { orgSettings } = useConfig();
     const [note, setNote] = useState<number>(5);
     const [hoverNote, setHoverNote] = useState<number>(0);
@@ -167,11 +167,10 @@ const CommentModal: React.FC<CommentModalProps> = ({
                                         disabled={!isAuthenticated}
                                     >
                                         <Star
-                                            className={`w-8 h-8 transition-colors duration-150 ${
-                                                star <= (hoverNote || note)
-                                                    ? 'fill-current text-yellow-400'
-                                                    : 'text-gray-300'
-                                            } ${!isAuthenticated ? 'opacity-50' : 'cursor-pointer'}`}
+                                            className={`w-8 h-8 transition-colors duration-150 ${star <= (hoverNote || note)
+                                                ? 'fill-current text-yellow-400'
+                                                : 'text-gray-300'
+                                                } ${!isAuthenticated ? 'opacity-50' : 'cursor-pointer'}`}
                                         />
                                     </button>
                                 ))}
@@ -206,11 +205,10 @@ const CommentModal: React.FC<CommentModalProps> = ({
                             rows={6}
                             maxLength={500}
                             disabled={!isAuthenticated}
-                            className={`w-full p-4 border rounded-xl resize-none transition-all duration-200 ${
-                                error
-                                    ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
-                                    : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
-                            } focus:ring-2 focus:ring-opacity-50 disabled:bg-gray-50 disabled:text-gray-500`}
+                            className={`w-full p-4 border rounded-xl resize-none transition-all duration-200 ${error
+                                ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
+                                : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
+                                } focus:ring-2 focus:ring-opacity-50 disabled:bg-gray-50 disabled:text-gray-500`}
                         />
                         <div className="flex justify-between mt-2">
                             <span className={`text-sm ${error ? 'text-red-600 font-medium' : 'text-gray-500'}`}>
@@ -234,7 +232,7 @@ const CommentModal: React.FC<CommentModalProps> = ({
                             <li>• Décrivez ce que vous avez aimé ou moins aimé dans ce livre</li>
                             <li>• Mentionnez le style d'écriture, l'intrigue, les personnages</li>
                             <li>• Restez respectueux et constructif dans vos critiques</li>
-                            <li>• Évitez les spoilers importants qui gâcheraient la lecture</li>
+                            <li>• Évitez les spoilers importants qui gâteraient la lecture</li>
                         </ul>
                     </div>
 
@@ -247,11 +245,10 @@ const CommentModal: React.FC<CommentModalProps> = ({
                                     {[1, 2, 3, 4, 5].map((star) => (
                                         <Star
                                             key={star}
-                                            className={`w-4 h-4 ${
-                                                star <= note
-                                                    ? 'fill-current text-yellow-400'
-                                                    : 'text-gray-300'
-                                            }`}
+                                            className={`w-4 h-4 ${star <= note
+                                                ? 'fill-current text-yellow-400'
+                                                : 'text-gray-300'
+                                                }`}
                                         />
                                     ))}
                                 </div>

@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Book, GraduationCap, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { collection, getDocs, limit, query } from 'firebase/firestore';
 import { db } from '../../configs/firebase';
 import { useConfig } from '../../contexts/ConfigContext';
+import { useSafeAuth } from '../../hooks/useSafeAuth';
 
 import BookCard, { BiblioBook } from '../books/BookCard';
 import ThesisCard from '../thesis/ThesisCard';
@@ -10,6 +12,7 @@ import { BiblioThesis } from '../../types/thesis';
 
 const ResourcesSection: React.FC = () => {
     const { orgSettings } = useConfig();
+    const { currentUser } = useSafeAuth();
     const [books, setBooks] = useState<BiblioBook[]>([]);
     const [theses, setTheses] = useState<BiblioThesis[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
@@ -218,6 +221,7 @@ const ResourcesSection: React.FC = () => {
                                         viewMode="grid"
                                         onToggleFavorite={handleToggleBookFavorite}
                                         isFavorite={favoriteBooks.includes(book.id)}
+                                        userLoggedIn={!!currentUser && currentUser.email !== undefined}
                                     />
                                 ))}
                             </div>
@@ -232,6 +236,7 @@ const ResourcesSection: React.FC = () => {
                                             viewMode="grid"
                                             onToggleFavorite={handleToggleBookFavorite}
                                             isFavorite={favoriteBooks.includes(book.id)}
+                                            userLoggedIn={!!currentUser && currentUser.email !== undefined}
                                         />
                                     ))}
                                 </div>
@@ -345,13 +350,13 @@ const ResourcesSection: React.FC = () => {
                             Notre équipe est là pour vous accompagner dans vos recherches académiques.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                            <a
-                                href="/contact"
+                            <Link
+                                to="/dashboard/messages"
                                 className="px-6 py-3 rounded-xl text-white font-medium transition-all duration-300 hover:shadow-lg transform hover:scale-105"
                                 style={{ backgroundColor: primaryColor }}
                             >
                                 Contacter un bibliothécaire
-                            </a>
+                            </Link>
                         </div>
                     </div>
                 </div>

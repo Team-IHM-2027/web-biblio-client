@@ -147,6 +147,13 @@ class CloudinaryService {
             formData.append('file', file);
             formData.append('upload_preset', this.config.uploadPreset);
 
+            // Logging upload details for debugging
+            console.log('📤 Cloudinary Upload Details:');
+            console.log('☁️ Cloud Name:', this.config.cloudName);
+            console.log('🎁 Upload Preset:', this.config.uploadPreset);
+            console.log('📁 Folder:', options.folder);
+            console.log('🆔 Public ID:', options.publicId);
+
             // ✅ Paramètres autorisés pour unsigned upload
             if (options.folder) {
                 formData.append('folder', options.folder);
@@ -213,7 +220,9 @@ class CloudinaryService {
                                 bytes: response.bytes
                             });
                         } else {
-                            console.error('❌ Erreur Cloudinary:', response);
+                            console.error('❌ Cloudinary Error Response:', response);
+                            console.error('❌ Status Code:', xhr.status);
+                            console.log('ℹ️ Check if VITE_CLOUDINARY_UPLOAD_PRESET matches your Cloudinary dashboard preset name.');
                             resolve({
                                 success: false,
                                 error: response.error?.message || 'Erreur lors de l\'upload'

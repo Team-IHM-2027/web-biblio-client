@@ -29,15 +29,15 @@ interface BookHeaderProps {
 }
 
 const BookHeader: React.FC<BookHeaderProps> = ({
-                                                   book,
-                                                   onReserve,
-                                                   onToggleFavorite,
-                                                   onOpenCommentModal,
-                                                   isFavorite,
-                                                   isAuthenticated,
-                                                   isReserving,
-                                                   commentsWithUserData = []
-                                               }) => {
+    book,
+    onReserve,
+    onToggleFavorite,
+    onOpenCommentModal,
+    isFavorite,
+    isAuthenticated,
+    isReserving,
+    commentsWithUserData = []
+}) => {
     const { orgSettings } = useConfig();
     const [imageError, setImageError] = useState(false);
     const [showShareMenu, setShowShareMenu] = useState(false);
@@ -86,30 +86,23 @@ const BookHeader: React.FC<BookHeaderProps> = ({
                 <div className="lg:col-span-1">
                     <div className="relative group">
                         <div className="aspect-[3/4] rounded-xl overflow-hidden bg-gray-100 shadow-lg">
-                            {book.image && !imageError ? (
-                                <img
-                                    src={book.image}
-                                    alt={`Couverture de ${book.name}`}
-                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                    onError={() => setImageError(true)}
-                                />
-                            ) : (
-                                <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
-                                    <BookOpen className="w-20 h-20 text-gray-400 mb-4" />
-                                    <span className="text-sm text-gray-500 text-center px-4">
-                                        {book.image ? 'Image non disponible' : 'Pas d\'image de couverture'}
-                                    </span>
-                                </div>
-                            )}
+                            <img
+                                src={book.image || '/default-cover.jpeg'}
+                                alt={`Couverture de ${book.name}`}
+                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                onError={(e) => {
+                                    setImageError(true);
+                                    e.currentTarget.src = '/default-cover.jpeg';
+                                }}
+                            />
                         </div>
 
                         {/* Badge de disponibilité flottant */}
                         <div className="absolute top-4 left-4 z-10">
-                            <div className={`px-3 py-2 rounded-full text-sm font-semibold flex items-center shadow-lg backdrop-blur-sm ${
-                                isAvailable
+                            <div className={`px-3 py-2 rounded-full text-sm font-semibold flex items-center shadow-lg backdrop-blur-sm ${isAvailable
                                     ? 'bg-green-100/90 text-green-700 border border-green-200'
                                     : 'bg-red-100/90 text-red-700 border border-red-200'
-                            }`}>
+                                }`}>
                                 {isAvailable ? (
                                     <>
                                         <CheckCircle className="w-4 h-4 mr-2" />
@@ -148,11 +141,10 @@ const BookHeader: React.FC<BookHeaderProps> = ({
                                             {[1, 2, 3, 4, 5].map((star) => (
                                                 <Star
                                                     key={star}
-                                                    className={`w-5 h-5 transition-colors duration-200 ${
-                                                        star <= Math.round(averageRating)
+                                                    className={`w-5 h-5 transition-colors duration-200 ${star <= Math.round(averageRating)
                                                             ? 'fill-current text-yellow-400'
                                                             : 'text-gray-300'
-                                                    }`}
+                                                        }`}
                                                 />
                                             ))}
                                         </div>
@@ -190,11 +182,10 @@ const BookHeader: React.FC<BookHeaderProps> = ({
                                 <button
                                     onClick={onToggleFavorite}
                                     disabled={!isAuthenticated}
-                                    className={`p-3 rounded-full transition-all duration-200 ${
-                                        isFavorite
+                                    className={`p-3 rounded-full transition-all duration-200 ${isFavorite
                                             ? 'bg-red-100 text-red-600 hover:bg-red-200'
                                             : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                    } ${!isAuthenticated ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                        } ${!isAuthenticated ? 'opacity-50 cursor-not-allowed' : ''}`}
                                     title={
                                         !isAuthenticated
                                             ? 'Connectez-vous pour ajouter aux favoris'
@@ -240,7 +231,7 @@ const BookHeader: React.FC<BookHeaderProps> = ({
                                                     }}
                                                     className="w-full px-4 py-3 text-left cursor-pointer text-sm hover:bg-gray-50 transition-colors rounded-lg"
                                                 >
-                                                     Partager sur Facebook
+                                                    Partager sur Facebook
                                                 </button>
                                             </div>
                                         </div>
@@ -325,11 +316,10 @@ const BookHeader: React.FC<BookHeaderProps> = ({
                                 <button
                                     onClick={onReserve}
                                     disabled={!isAvailable || isReserving || !isAuthenticated}
-                                    className={`flex-1 py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-200 flex items-center justify-center ${
-                                        isAvailable && !isReserving && isAuthenticated
+                                    className={`flex-1 py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-200 flex items-center justify-center ${isAvailable && !isReserving && isAuthenticated
                                             ? 'text-white shadow-lg hover:shadow-xl transform hover:scale-[1.02]'
                                             : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                    }`}
+                                        }`}
                                     style={{
                                         backgroundColor: isAvailable && !isReserving && isAuthenticated ? primaryColor : undefined
                                     }}
@@ -355,9 +345,8 @@ const BookHeader: React.FC<BookHeaderProps> = ({
                                 <button
                                     onClick={onOpenCommentModal}
                                     disabled={!isAuthenticated}
-                                    className={`sm:w-auto px-6 py-4 rounded-xl font-semibold text-lg border-2 transition-all duration-200 hover:shadow-lg ${
-                                        !isAuthenticated ? 'opacity-50 cursor-not-allowed' : ''
-                                    }`}
+                                    className={`sm:w-auto px-6 py-4 rounded-xl font-semibold text-lg border-2 transition-all duration-200 hover:shadow-lg ${!isAuthenticated ? 'opacity-50 cursor-not-allowed' : ''
+                                        }`}
                                     style={{
                                         borderColor: primaryColor,
                                         color: isAuthenticated ? primaryColor : '#9ca3af',

@@ -6,8 +6,9 @@ import { useConfig } from '../../contexts/ConfigContext';
 import { authService } from '../../services/auth/authService';
 import { BiblioUser } from '../../types/auth';
 import { BookOpen, ShoppingBag, User, Menu, X, LogOut, Settings, Bell, MessageCircle, History, Heart } from 'lucide-react';
-import CartDropdown from "./CartDropdown.tsx";
+import CartDropdown from "./CartDropdown";
 import NotificationIcon from '../common/NotificationIcon';
+import { getRandomDefaultAvatar } from '../../utils/userUtils';
 
 const Header: React.FC = () => {
     const navigate = useNavigate();
@@ -91,7 +92,7 @@ const Header: React.FC = () => {
             >
                 <div className="relative">
                     <img
-                        src={currentUser?.profilePicture || currentUser?.imageUri || '/default-avatar.png'}
+                        src={currentUser?.profilePicture || currentUser?.imageUri || getRandomDefaultAvatar(currentUser?.id)}
                         alt="Avatar"
                         className="w-8 h-8 rounded-full object-cover border-2"
                         style={{ borderColor: primaryColor }}
@@ -116,7 +117,7 @@ const Header: React.FC = () => {
                     <div className="px-4 py-3 border-b border-gray-100">
                         <div className="flex items-center space-x-3">
                             <img
-                                src={currentUser?.profilePicture || currentUser?.imageUri || '/default-avatar.png'}
+                                src={currentUser?.profilePicture || currentUser?.imageUri || getRandomDefaultAvatar(currentUser?.id)}
                                 alt="Avatar"
                                 className="w-12 h-12 rounded-full object-cover"
                             />
@@ -129,7 +130,7 @@ const Header: React.FC = () => {
                             </div>
                         </div>
                     </div>
-                    <div className="px-4 py-3 border-b border-gray-100">
+                    {/* <div className="px-4 py-3 border-b border-gray-100">
                         <div className="grid grid-cols-3 gap-4 text-center">
                             <div>
                                 <p className="text-lg font-bold text-blue-600">
@@ -150,7 +151,7 @@ const Header: React.FC = () => {
                                 <p className="text-xs text-gray-500">Récents</p>
                             </div>
                         </div>
-                    </div>
+                    </div> */}
                     <div className="py-2">
                         <NavLink
                             to="/dashboard/profile"
@@ -175,7 +176,7 @@ const Header: React.FC = () => {
                             )}
                         </NavLink>
                         <NavLink
-                            to="/dashboard/emprunts"
+                            to="/dashboard/consultations"
                             className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
                             onClick={() => setShowUserMenu(false)}
                         >
@@ -198,7 +199,7 @@ const Header: React.FC = () => {
                             <Heart className="w-4 h-4 mr-3" />
                             Favoris
                         </NavLink>
-                        <NavLink
+                        {/* <NavLink
                             to="/dashboard/notifications"
                             className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
                             onClick={() => setShowUserMenu(false)}
@@ -210,16 +211,16 @@ const Header: React.FC = () => {
                                     {unreadNotifications}
                                 </span>
                             )}
-                        </NavLink>
+                        </NavLink> */}
                         <div className="border-t border-gray-100 my-2"></div>
-                        <NavLink
+                        {/* <NavLink
                             to="/dashboard/settings"
                             className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
                             onClick={() => setShowUserMenu(false)}
                         >
                             <Settings className="w-4 h-4 mr-3" />
                             Paramètres
-                        </NavLink>
+                        </NavLink> */}
                         <button
                             onClick={handleSignOut}
                             className="flex items-center w-full px-4 py-2 text-red-600 hover:bg-red-50 transition-colors"
@@ -390,7 +391,7 @@ const Header: React.FC = () => {
                                 <div className="px-4 py-2 border-t border-gray-100 mt-2">
                                     <div className="flex items-center space-x-3 mb-4">
                                         <img
-                                            src={currentUser.profilePicture || currentUser.imageUri || '/default-avatar.png'}
+                                            src={currentUser.profilePicture || currentUser.imageUri || getRandomDefaultAvatar(currentUser.id)}
                                             alt="Avatar"
                                             className="w-10 h-10 rounded-full object-cover"
                                         />

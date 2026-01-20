@@ -1,25 +1,28 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useConfig } from '../contexts/ConfigContext';
 import { authService } from '../services/auth/authService';
 import { BiblioUser } from '../types/auth';
 import { Timestamp, doc, updateDoc, arrayUnion, getDoc } from 'firebase/firestore';
 import { db } from '../configs/firebase';
+import { getRandomDefaultAvatar } from '../utils/userUtils';
 
 // Import des composants pour les mémoires
 import ThesisHeader from '../components/thesis/ThesisHeader';
 import ThesisDescription from '../components/thesis/ThesisDescription';
-import CommentsSection from '../components/common/CommentsSection.tsx';
-import CommentModal from '../components/common/CommentModal.tsx';
+import CommentsSection from '../components/common/CommentsSection';
+import CommentModal from '../components/common/CommentModal';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import { historyService } from '../services/historyService';
 
 // Import des interfaces
 import { BiblioThesis, ThesisComment, ThesisCommentWithUserData } from '../types/thesis';
-import Footer from "../components/layout/Footer.tsx";
+import Footer from "../components/layout/Footer";
 
 const ThesisDetailsPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const location = useLocation();
     const { orgSettings } = useConfig();
 
     // États principaux
@@ -61,11 +64,14 @@ const ThesisDetailsPage: React.FC = () => {
         try {
             return {
                 userName: nomUser || 'Utilisateur anonyme',
-                userAvatar: undefined
+                userAvatar: getRandomDefaultAvatar(nomUser)
             };
         } catch (error) {
             console.error('Erreur récupération données utilisateur:', error);
-            return { userName: nomUser || 'Utilisateur anonyme' };
+            return {
+                userName: nomUser || 'Utilisateur anonyme',
+                userAvatar: getRandomDefaultAvatar(nomUser)
+            };
         }
     };
 
@@ -143,24 +149,24 @@ const ThesisDetailsPage: React.FC = () => {
 
     // Dans ThesisDetailsPage.tsx
 
-// ... dans le composant ThesisDetailsPage, après les autres hooks ...
+    // ... dans le composant ThesisDetailsPage, après les autres hooks ...
 
-useEffect(() => {
-    // Enregistre la consultation dans l'historique
-    if (isAuthenticated && currentUser && thesis) {
-        historyService.addHistoryEvent({
-            userId: currentUser.id,
-            type: 'thesis_view',
-            itemId: thesis.id,
-            itemTitle: thesis.theme || thesis.name,
-            itemCoverUrl: thesis.image,
-        });
-    }
-}, [isAuthenticated, currentUser, thesis]);
+    useEffect(() => {
+        // Enregistre la consultation dans l'historique
+        if (isAuthenticated && currentUser && thesis) {
+            historyService.addHistoryEvent({
+                userId: currentUser.id,
+                type: 'thesis_view',
+                itemId: thesis.id,
+                itemTitle: thesis.theme || thesis.name,
+                itemCoverUrl: thesis.image,
+            });
+        }
+    }, [isAuthenticated, currentUser, thesis]);
     // Gestion de la consultation
     const handleView = async () => {
         if (!isAuthenticated) {
-            navigate('/auth');
+            navigate('/auth', { state: { from: location } });
             return;
         }
 
@@ -190,7 +196,7 @@ useEffect(() => {
     // Gestion des favoris
     const handleToggleFavorite = async () => {
         if (!isAuthenticated) {
-            navigate('/auth');
+            navigate('/auth', { state: { from: location } });
             return;
         }
 
@@ -239,7 +245,7 @@ useEffect(() => {
                 id: `comment_new_${Date.now()}`,
                 userId: currentUser.id || '',
                 userName: currentUser.name,
-                userAvatar: currentUser.profilePicture,
+                userAvatar: currentUser.profilePicture || currentUser.imageUri || getRandomDefaultAvatar(currentUser.id),
                 helpful: 0
             };
 

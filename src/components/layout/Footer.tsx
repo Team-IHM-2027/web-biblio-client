@@ -1,5 +1,5 @@
-import { useConfig } from '../../contexts/ConfigContext.tsx';
-import { configService } from '../../services/configService.ts';
+import { useConfig } from '../../contexts/ConfigContext';
+import { configService } from '../../services/configService';
 import { Mail, Phone, Facebook, Instagram, Clock, MapPin } from 'lucide-react';
 
 const Footer = () => {
@@ -221,8 +221,8 @@ const Footer = () => {
                                     <span
                                         className={`font-medium ${day.hours === 'Fermé' ? 'text-red-400' : 'text-green-400'}`}
                                     >
-                    {day.hours}
-                  </span>
+                                        {day.hours}
+                                    </span>
                                 </div>
                             ))}
                         </div>

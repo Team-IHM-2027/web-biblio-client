@@ -50,8 +50,8 @@ const DashboardLayout = () => {
     const G = (num >> 8 & 0x00FF) + amt;
     const B = (num & 0x0000FF) + amt;
     return "#" + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
-        (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
-        (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1);
+      (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
+      (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1);
   };
 
   const primaryColorDark = darkenColor(primaryColor);
@@ -100,13 +100,13 @@ const DashboardLayout = () => {
     },
     {
       path: '/dashboard/emprunts',
-      name: 'Emprunts',
+      name: 'Mes Emprunts',
       icon: <Calendar size={20} />,
       badge: 0
     },
     {
-      path: '/dashboard/chat',
-      name: 'Chat',
+      path: '/dashboard/messages',
+      name: 'Messages',
       icon: <MessageCircle size={20} />
     },
 
@@ -115,12 +115,12 @@ const DashboardLayout = () => {
       name: 'Consultations',
       icon: <Clock size={20} />
     },
-    {
-      path: '/dashboard/notifications',
-      name: 'Notifications',
-      icon: <Bell size={20} />,
-      badge: 0
-    }
+    // {
+    //   path: '/dashboard/notifications',
+    //   name: 'Notifications',
+    //   icon: <Bell size={20} />,
+    //   badge: 0
+    // }
   ];
 
   if (loading) {
@@ -135,9 +135,8 @@ const DashboardLayout = () => {
     <div className="flex h-screen overflow-hidden" style={{ backgroundColor: '#f8fafc' }}>
       {/* Sidebar */}
       <aside
-        className={`fixed md:relative h-full transition-all duration-300 z-20 ${
-          isMobile && !collapsed ? 'translate-x-0' : isMobile && collapsed ? '-translate-x-full' : 'translate-x-0'
-        }`}
+        className={`fixed md:relative h-full transition-all duration-300 z-20 ${isMobile && !collapsed ? 'translate-x-0' : isMobile && collapsed ? '-translate-x-full' : 'translate-x-0'
+          }`}
         style={{
           width: collapsed ? '80px' : '280px',
           background: `linear-gradient(135deg, ${secondaryColor} 0%, ${darkenColor(secondaryColor, 10)} 100%)`,
@@ -235,17 +234,16 @@ const DashboardLayout = () => {
           <ul className="space-y-2">
             {menuItems.map((item) => {
               const isActive = location.pathname === item.path ||
-                              (item.path === '/dashboard' && location.pathname === '/dashboard');
+                (item.path === '/dashboard' && location.pathname === '/dashboard');
 
               return (
                 <li key={item.path}>
                   <NavLink
                     to={item.path}
-                    className={`group flex items-center px-3 py-3 rounded-xl transition-all duration-300 relative overflow-hidden ${
-                      isActive
-                        ? 'font-semibold shadow-lg transform scale-105'
-                        : 'hover:bg-white/10 hover:transform hover:scale-105'
-                    }`}
+                    className={`group flex items-center px-3 py-3 rounded-xl transition-all duration-300 relative overflow-hidden ${isActive
+                      ? 'font-semibold shadow-lg transform scale-105'
+                      : 'hover:bg-white/10 hover:transform hover:scale-105'
+                      }`}
                     style={{
                       background: isActive
                         ? `linear-gradient(135deg, ${primaryColor}, ${primaryColorDark})`
@@ -349,23 +347,27 @@ const DashboardLayout = () => {
         <div className="sticky top-0 z-10 bg-white/80 backdrop-blur-sm border-b border-gray-200/50">
           <div className="px-6 py-4 flex items-center justify-between">
             <div>
+              <Link to="/" className="flex items-center text-primary hover:text-primary-dark transition-colors mb-1 group">
+                <div className="mr-1 transform group-hover:-translate-x-1 transition-transform">←</div>
+                <span className="text-xs font-medium uppercase tracking-wider">Retour à l'accueil</span>
+              </Link>
               <h1 className="text-2xl font-bold text-gray-900">
                 {location.pathname === '/' ? 'Accueil' :
-                 location.pathname.includes('profile') ? 'Profil' :
-                 location.pathname.includes('reservations') ? 'Réservations' :
-                 location.pathname.includes('cart') ? 'Panier' :
-                 location.pathname.includes('chat') ? 'Chat' :
-                 location.pathname.includes('statistics') ? 'Statistiques' :
-                 location.pathname.includes('history') ? 'Historique' :
-                 location.pathname.includes('notifications') ? 'Notifications' :
-                 'Dashboard'}
+                  location.pathname.includes('profile') ? 'Profil' :
+                    location.pathname.includes('emprunts') ? 'Mes Emprunts' :
+                      location.pathname.includes('cart') ? 'Panier' :
+                        location.pathname.includes('messages') ? 'Messages' :
+                          location.pathname.includes('statistics') ? 'Statistiques' :
+                            location.pathname.includes('consultations') ? 'Consultations' :
+                              location.pathname.includes('notifications') ? 'Notifications' :
+                                'Dashboard'}
               </h1>
               <p className="text-gray-600 text-sm">
                 Bienvenue, {user?.name?.split(' ')[0] || 'Utilisateur'}
               </p>
             </div>
 
-            <div className="flex items-center space-x-4">
+            {/* <div className="flex items-center space-x-4">
               <button
                 className="relative p-2 rounded-full hover:bg-gray-100 transition-colors duration-200"
                 style={{ color: primaryColor }}
@@ -379,7 +381,7 @@ const DashboardLayout = () => {
               >
                 <Settings size={20} />
               </button>
-            </div>
+            </div> */}
           </div>
         </div>
 

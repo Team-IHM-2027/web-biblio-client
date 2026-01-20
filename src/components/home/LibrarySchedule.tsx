@@ -355,7 +355,7 @@ const LibrarySchedule: React.FC = () => {
                 </div>
 
                 {/* Section Contact pour questions */}
-                <div className="mt-16">
+                {/* <div className="mt-16">
                     <div
                         className="rounded-2xl p-8 text-center"
                         style={{
@@ -389,7 +389,7 @@ const LibrarySchedule: React.FC = () => {
                             </a>
                         </div>
                     </div>
-                </div>
+                </div> */}
             </div>
         </section>
     );

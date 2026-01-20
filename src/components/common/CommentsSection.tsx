@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useConfig } from '../../contexts/ConfigContext.tsx';
-import { CommentWithUserData } from '../books/BookCard.tsx';
+import { useConfig } from '../../contexts/ConfigContext';
+import { CommentWithUserData } from '../books/BookCard';
 import { Timestamp } from 'firebase/firestore';
 import {
     MessageSquare,
@@ -23,11 +23,11 @@ type SortOption = 'newest' | 'oldest' | 'rating-high' | 'rating-low' | 'helpful'
 type FilterOption = 'all' | '5stars' | '4stars' | '3stars' | '2stars' | '1star';
 
 const CommentsSection: React.FC<CommentsSectionProps> = ({
-                                                             comments,
-                                                             onOpenCommentModal,
-                                                             onHelpfulClick,
-                                                             isAuthenticated
-                                                         }) => {
+    comments,
+    onOpenCommentModal,
+    onHelpfulClick,
+    isAuthenticated
+}) => {
     const { orgSettings } = useConfig();
     const [sortBy, setSortBy] = useState<SortOption>('newest');
     const [filterBy, setFilterBy] = useState<FilterOption>('all');
@@ -141,11 +141,10 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
                                         {[1, 2, 3, 4, 5].map((star) => (
                                             <Star
                                                 key={star}
-                                                className={`w-5 h-5 ${
-                                                    star <= ratingStats.average
+                                                className={`w-5 h-5 ${star <= ratingStats.average
                                                         ? 'fill-current text-yellow-400'
                                                         : 'text-gray-300'
-                                                }`}
+                                                    }`}
                                             />
                                         ))}
                                     </div>
@@ -211,9 +210,8 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
                                                     setFilterBy(option.value as FilterOption);
                                                     setShowFilters(false);
                                                 }}
-                                                className={`w-full text-left px-3 py-2 rounded hover:bg-gray-100 transition-colors ${
-                                                    filterBy === option.value ? 'bg-gray-100 font-medium' : ''
-                                                }`}
+                                                className={`w-full text-left px-3 py-2 rounded hover:bg-gray-100 transition-colors ${filterBy === option.value ? 'bg-gray-100 font-medium' : ''
+                                                    }`}
                                             >
                                                 {option.label}
                                             </button>
@@ -273,11 +271,10 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
                                                 {[1, 2, 3, 4, 5].map((star) => (
                                                     <Star
                                                         key={star}
-                                                        className={`w-4 h-4 ${
-                                                            star <= comment.note
+                                                        className={`w-4 h-4 ${star <= comment.note
                                                                 ? 'fill-current text-yellow-400'
                                                                 : 'text-gray-300'
-                                                        }`}
+                                                            }`}
                                                     />
                                                 ))}
                                             </div>

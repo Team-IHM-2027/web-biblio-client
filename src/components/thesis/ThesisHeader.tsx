@@ -29,15 +29,15 @@ interface ThesisHeaderProps {
 }
 
 const ThesisHeader: React.FC<ThesisHeaderProps> = ({
-                                                       thesis,
-                                                       onView,
-                                                       onToggleFavorite,
-                                                       onOpenCommentModal,
-                                                       isFavorite,
-                                                       isAuthenticated,
-                                                       isViewing,
-                                                       commentsWithUserData = []
-                                                   }) => {
+    thesis,
+    onView,
+    onToggleFavorite,
+    onOpenCommentModal,
+    isFavorite,
+    isAuthenticated,
+    isViewing,
+    commentsWithUserData = []
+}) => {
     const { orgSettings } = useConfig();
     const [imageError, setImageError] = useState(false);
     const [showShareMenu, setShowShareMenu] = useState(false);
@@ -82,21 +82,15 @@ const ThesisHeader: React.FC<ThesisHeaderProps> = ({
                 <div className="lg:col-span-1">
                     <div className="relative group">
                         <div className="aspect-[3/4] rounded-xl overflow-hidden bg-gray-100 shadow-lg">
-                            {thesis.image && !imageError ? (
-                                <img
-                                    src={thesis.image}
-                                    alt={`Mémoire de ${thesis.name}`}
-                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                    onError={() => setImageError(true)}
-                                />
-                            ) : (
-                                <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
-                                    <GraduationCap className="w-20 h-20 text-gray-400 mb-4" />
-                                    <span className="text-sm text-gray-500 text-center px-4">
-                                        {thesis.image ? 'Image non disponible' : 'Pas d\'image de couverture'}
-                                    </span>
-                                </div>
-                            )}
+                            <img
+                                src={thesis.image || '/default-cover.jpeg'}
+                                alt={`Mémoire de ${thesis.name}`}
+                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                onError={(e) => {
+                                    setImageError(true);
+                                    e.currentTarget.src = '/default-cover.jpeg';
+                                }}
+                            />
                         </div>
 
                         {/* Badge d'année flottant */}
@@ -142,11 +136,10 @@ const ThesisHeader: React.FC<ThesisHeaderProps> = ({
                                             {[1, 2, 3, 4, 5].map((star) => (
                                                 <Star
                                                     key={star}
-                                                    className={`w-5 h-5 transition-colors duration-200 ${
-                                                        star <= Math.round(averageRating)
+                                                    className={`w-5 h-5 transition-colors duration-200 ${star <= Math.round(averageRating)
                                                             ? 'fill-current text-yellow-400'
                                                             : 'text-gray-300'
-                                                    }`}
+                                                        }`}
                                                 />
                                             ))}
                                         </div>
@@ -184,11 +177,10 @@ const ThesisHeader: React.FC<ThesisHeaderProps> = ({
                                 <button
                                     onClick={onToggleFavorite}
                                     disabled={!isAuthenticated}
-                                    className={`p-3 rounded-full cursor-pointer transition-all duration-200 ${
-                                        isFavorite
+                                    className={`p-3 rounded-full cursor-pointer transition-all duration-200 ${isFavorite
                                             ? 'bg-red-100 text-red-600 hover:bg-red-200'
                                             : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                    } ${!isAuthenticated ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                        } ${!isAuthenticated ? 'opacity-50 cursor-not-allowed' : ''}`}
                                     title={
                                         !isAuthenticated
                                             ? 'Connectez-vous pour ajouter aux favoris'
@@ -311,11 +303,10 @@ const ThesisHeader: React.FC<ThesisHeaderProps> = ({
                                 <button
                                     onClick={onView}
                                     disabled={isViewing || !isAuthenticated}
-                                    className={`flex-1 py-4 px-6 cursor-pointer rounded-xl font-semibold text-lg transition-all duration-200 flex items-center justify-center ${
-                                        !isViewing && isAuthenticated
+                                    className={`flex-1 py-4 px-6 cursor-pointer rounded-xl font-semibold text-lg transition-all duration-200 flex items-center justify-center ${!isViewing && isAuthenticated
                                             ? 'text-white shadow-lg hover:shadow-xl transform hover:scale-[1.02]'
                                             : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                    }`}
+                                        }`}
                                     style={{
                                         backgroundColor: !isViewing && isAuthenticated ? primaryColor : undefined
                                     }}
@@ -365,9 +356,8 @@ const ThesisHeader: React.FC<ThesisHeaderProps> = ({
                                 <button
                                     onClick={onOpenCommentModal}
                                     disabled={!isAuthenticated}
-                                    className={`sm:w-auto px-6 py-4 cursor-pointer rounded-xl font-semibold text-lg border-2 transition-all duration-200 hover:shadow-lg ${
-                                        !isAuthenticated ? 'opacity-50 cursor-not-allowed' : ''
-                                    }`}
+                                    className={`sm:w-auto px-6 py-4 cursor-pointer rounded-xl font-semibold text-lg border-2 transition-all duration-200 hover:shadow-lg ${!isAuthenticated ? 'opacity-50 cursor-not-allowed' : ''
+                                        }`}
                                     style={{
                                         borderColor: primaryColor,
                                         color: isAuthenticated ? primaryColor : '#9ca3af',

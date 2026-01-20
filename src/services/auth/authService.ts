@@ -118,8 +118,8 @@ class AuthService {
                 ...userStateData
             };
 
-            // Sauvegarder dans Firestore
-            await setDoc(doc(db, 'BiblioUser', firebaseUser.email!), biblioUser);
+            // Sauvegarder dans Firestore (Standardisation sur UID pour la clé du document)
+            await setDoc(doc(db, 'BiblioUser', firebaseUser.uid), biblioUser);
 
             // Mise à jour du profil Firebase Auth
             await updateProfile(firebaseUser, {
@@ -165,17 +165,37 @@ class AuthService {
             const firebaseUser = userCredential.user;
 
             // Récupérer les données utilisateur depuis Firestore
-            const userDoc = await getDoc(doc(db, 'BiblioUser', firebaseUser.email!));
+            let userDoc = await getDoc(doc(db, 'BiblioUser', firebaseUser.email!));
+
+            // Fallback pour les comptes créés sur mobile (souvent indexés par UID)
+            if (!userDoc.exists()) {
+                userDoc = await getDoc(doc(db, 'BiblioUser', firebaseUser.uid));
+            }
 
             if (!userDoc.exists()) {
-                console.error('❌ Utilisateur non trouvé dans Firestore');
+                console.error('❌ Utilisateur non trouvé dans Firestore (Email ou UID)');
                 throw new Error('Utilisateur non trouvé dans la base de données');
             }
 
             const biblioUser = userDoc.data() as BiblioUser;
+            const docId = userDoc.id;
+
+            // ⭐ CHECK IF USER IS BLOCKED
+            if (biblioUser.etat === 'bloc') {
+                // Sign out immediately
+                await firebaseSignOut(auth);
+
+                const blockReason = biblioUser.blockedReason || 'Violation des règles de la bibliothèque';
+
+                return {
+                    success: false,
+                    message: `Votre compte a été bloqué. Raison: ${blockReason}`,
+                    user: undefined
+                };
+            }
 
             // Mettre à jour la dernière connexion
-            await updateDoc(doc(db, 'BiblioUser', firebaseUser.email!), {
+            await updateDoc(doc(db, 'BiblioUser', docId), {
                 lastLoginAt: Timestamp.now()
             });
 
@@ -242,7 +262,11 @@ class AuthService {
             const firebaseUser = auth.currentUser;
             if (!firebaseUser) return null;
 
-            const userDoc = await getDoc(doc(db, 'BiblioUser', firebaseUser.email!));
+            let userDoc = await getDoc(doc(db, 'BiblioUser', firebaseUser.email!));
+
+            if (!userDoc.exists()) {
+                userDoc = await getDoc(doc(db, 'BiblioUser', firebaseUser.uid));
+            }
 
             if (!userDoc.exists()) return null;
 
@@ -270,8 +294,21 @@ class AuthService {
             if (updateData.niveau === undefined) updateData.niveau = '';
             if (updateData.departement === undefined) updateData.departement = '';
 
+            // Trouver le bon document (Email ou UID)
+            let userDocRef = doc(db, 'BiblioUser', firebaseUser.email!);
+            let userDoc = await getDoc(userDocRef);
+
+            if (!userDoc.exists()) {
+                userDocRef = doc(db, 'BiblioUser', firebaseUser.uid);
+                userDoc = await getDoc(userDocRef);
+            }
+
+            if (!userDoc.exists()) {
+                throw new Error('Utilisateur non trouvé dans la base de données');
+            }
+
             // Mettre à jour dans Firestore
-            await updateDoc(doc(db, 'BiblioUser', firebaseUser.uid), updateData);
+            await updateDoc(userDocRef, updateData);
 
             // Mettre à jour le profil Firebase Auth si nécessaire
             const authUpdateData: { displayName?: string; photoURL?: string } = {};

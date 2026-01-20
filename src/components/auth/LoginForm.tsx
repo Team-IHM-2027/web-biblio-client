@@ -96,7 +96,14 @@ const LoginForm: React.FC<LoginFormProps> = ({
             if (response.success) {
                 onSuccess();
             } else {
-                setErrors({ general: response.message || 'Erreur lors de la connexion' });
+                // Show clear error message for blocked users
+                const errorMessage = response.message || 'Erreur lors de la connexion';
+                
+                if (errorMessage.includes('bloqué') || errorMessage.includes('Violation')) {
+                  setErrors({ general: errorMessage });
+                } else {
+                  setErrors({ general: errorMessage });
+                }
             }
         } catch {
             setErrors({ general: 'Une erreur inattendue s\'est produite' });

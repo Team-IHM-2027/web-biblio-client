@@ -36,7 +36,7 @@ const HomePage: React.FC = () => {
 
                     <OnlineLearningSection />
 
-                    <Statistics />
+                    {/* <Statistics /> */}
                 </main>
             </div>
 

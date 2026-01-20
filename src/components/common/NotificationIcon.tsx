@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Bell, X } from 'lucide-react';
 import { BiblioUser } from '../../types/auth';
 import { Link } from 'react-router-dom';
-import { doc, onSnapshot, updateDoc, arrayRemove } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc, arrayRemove, deleteDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../configs/firebase';
 
 interface Props {
@@ -13,7 +13,7 @@ interface Props {
 
 export interface NotificationItem {
   id: string;
-  type: 'error' | 'success' | 'warning' | 'info' | 'reservation' | 'reservation_update' | 'reservation_request' | 'reservation_approved' | 'reservation_rejected' | 'emprunt' | 'retour' | 'annulation' | 'rappel' | 'nouveau_livre';
+  type: 'error' | 'success' | 'warning' | 'info' | 'reservation' | 'reservation_update' | 'reservation_request' | 'reservation_approved' | 'reservation_rejected' | 'loan_validated' | 'loan_returned' | 'penalty' | 'reminder' | 'emprunt' | 'retour' | 'annulation' | 'rappel' | 'nouveau_livre';
   title?: string;
   message?: string;
   date: any; // Timestamp or serialized date
@@ -41,7 +41,7 @@ const NotificationIcon: React.FC<Props> = ({ currentUser, maxVisible = 6 }) => {
     return () => window.removeEventListener('click', onClick);
   }, [open]);
 
-  // Subscribe to Notifications via Firestore Document
+  // Subscribe to Notifications via Firestore Collection
   useEffect(() => {
     if (!currentUser?.email) {
       setNotifications([]);
@@ -52,28 +52,80 @@ const NotificationIcon: React.FC<Props> = ({ currentUser, maxVisible = 6 }) => {
     setLoading(true);
 
     try {
-      const userRef = doc(db, 'BiblioUser', currentUser.email);
-      const unsubscribe = onSnapshot(userRef, (docSnapshot) => {
-        if (docSnapshot.exists()) {
-          const userData = docSnapshot.data();
-          const userNotifications = userData.notifications || [];
+      const notificationsRef = collection(db, 'Notifications');
+
+      // Query by userEmail (primary)
+      const q = query(
+        notificationsRef,
+        where('userEmail', '==', currentUser.email)
+      );
+
+      // Set up the snapshot listener for userEmail
+      const unsubscribe = onSnapshot(
+        q,
+        async (querySnapshot) => {
+          const notifs: NotificationItem[] = [];
+
+          // Add notifications from userEmail query
+          querySnapshot.forEach((docSnap) => {
+            const data = docSnap.data();
+            notifs.push({
+              id: docSnap.id,
+              type: data.type || 'info',
+              title: data.title,
+              message: data.message,
+              date: data.date || data.createdAt || data.timestamp,
+              read: data.read || false,
+              link: data.link,
+              bookId: data.bookId,
+              bookTitle: data.bookTitle,
+            });
+          });
+
+          // Also query by userId as fallback (in case some notifications were stored with userId instead of userEmail)
+          try {
+            const qByUserId = query(
+              notificationsRef,
+              where('userId', '==', currentUser.email)
+            );
+            const userIdSnapshot = await getDocs(qByUserId);
+
+            userIdSnapshot.forEach((docSnap) => {
+              // Only add if not already in notifs (avoid duplicates)
+              if (!notifs.find(n => n.id === docSnap.id)) {
+                const data = docSnap.data();
+                notifs.push({
+                  id: docSnap.id,
+                  type: data.type || 'info',
+                  title: data.title,
+                  message: data.message,
+                  date: data.date || data.createdAt || data.timestamp,
+                  read: data.read || false,
+                  link: data.link,
+                  bookId: data.bookId,
+                  bookTitle: data.bookTitle,
+                });
+              }
+            });
+          } catch (err) {
+            console.error('Error querying by userId:', err);
+          }
 
           // Sort by date (newest first)
-          const sortedNotifications = userNotifications.sort((a: any, b: any) => {
-            const dateA = a.date?.seconds ? new Date(a.date.seconds * 1000) : new Date(a.date);
-            const dateB = b.date?.seconds ? new Date(b.date.seconds * 1000) : new Date(b.date);
+          const sortedNotifications = notifs.sort((a, b) => {
+            const dateA = a.date?.seconds ? new Date(a.date.seconds * 1000) : new Date(a.date || 0);
+            const dateB = b.date?.seconds ? new Date(b.date.seconds * 1000) : new Date(b.date || 0);
             return dateB.getTime() - dateA.getTime();
           });
 
           setNotifications(sortedNotifications);
-        } else {
-          setNotifications([]);
+          setLoading(false);  // Mark loading as done
+        },
+        (error) => {
+          console.error('Erreur lors de la récupération des notifications:', error);
+          setLoading(false);  // Mark loading as done even on error
         }
-        setLoading(false);
-      }, (error) => {
-        console.error('Erreur lors de la récupération des notifications:', error);
-        setLoading(false);
-      });
+      );
 
       return () => unsubscribe();
     } catch (error) {
@@ -81,7 +133,6 @@ const NotificationIcon: React.FC<Props> = ({ currentUser, maxVisible = 6 }) => {
       setLoading(false);
     }
   }, [currentUser?.email]);
-
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
@@ -114,27 +165,18 @@ const NotificationIcon: React.FC<Props> = ({ currentUser, maxVisible = 6 }) => {
     return date.toLocaleDateString();
   };
 
-  // Mark a single notification as read
+  // Mark a single notification as read in Firestore
   const markAsRead = async (notifId: string) => {
     if (!currentUser?.email) return;
 
     try {
-      const userRef = doc(db, 'BiblioUser', currentUser.email);
-
-      // Update local first for UI responsiveness (optional, but good)
-      // Actually, since we use onSnapshot, we should rely on that, but we can optimistically update if we want better UX.
-      // For now, let's just do the db update.
-
-      const updatedNotifications = notifications.map(notification =>
-        notification.id === notifId
-          ? { ...notification, read: true }
-          : notification
-      );
-
-      await updateDoc(userRef, {
-        notifications: updatedNotifications
+      const notifRef = doc(db, 'Notifications', notifId);
+      await updateDoc(notifRef, {
+        read: true,
+        readAt: new Date()
       });
-
+      // Update local state immediately for better UX
+      setNotifications(prev => prev.map(n => n.id === notifId ? { ...n, read: true } : n));
     } catch (err) {
       console.error('Erreur lors du marquage comme lu:', err);
     }
@@ -145,57 +187,38 @@ const NotificationIcon: React.FC<Props> = ({ currentUser, maxVisible = 6 }) => {
     if (!currentUser?.email || notifications.length === 0) return;
 
     try {
-      const userRef = doc(db, 'BiblioUser', currentUser.email);
-
-      const updatedNotifications = notifications.map(notification => ({
-        ...notification,
-        read: true
-      }));
-
-      await updateDoc(userRef, {
-        notifications: updatedNotifications
+      const unreadNotifs = notifications.filter(n => !n.read);
+      const promises = unreadNotifs.map(n => {
+        const notifRef = doc(db, 'Notifications', n.id);
+        return updateDoc(notifRef, {
+          read: true,
+          readAt: new Date()
+        });
       });
+
+      await Promise.all(promises);
+      // Update local state immediately
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
     } catch (err) {
       console.error('Erreur lors du marquage de tous comme lus:', err);
     }
   };
 
-  // Delete a single notification
+  // Delete a single notification from Firestore
   const deleteNotification = async (notificationToDelete: NotificationItem, e?: React.MouseEvent) => {
     e?.stopPropagation();
     if (!currentUser?.email) return;
 
     setDeletingId(notificationToDelete.id);
     try {
-      const userRef = doc(db, 'BiblioUser', currentUser.email);
+      // Actually delete from Notifications collection
+      const notifRef = doc(db, 'Notifications', notificationToDelete.id);
+      await deleteDoc(notifRef);  // Use deleteDoc instead of updateDoc
 
-      // We need to pass the EXACT object to arrayRemove or it won't work if it's referenced by value
-      // However, arrayRemove checks equality. If the object in DB matches exactly all fields?
-      // Notification.js uses arrayRemove(notificationToDelete).
-      // Let's rely on arrayRemove finding the object.
-      // BEWARE: If fields changed (like read status changed by another client?), arrayRemove might fail if we pass the stale local object.
-      // It's safer to read the current doc, filter out the item, and write back the array.
-      // But let's try arrayRemove first as in the mobile app.
-      // Actually, in the mobile app `deleteNotification` takes `notificationToDelete` which comes from the state `renderItem`.
-
-      await updateDoc(userRef, {
-        notifications: arrayRemove(notificationToDelete)
-      });
-
+      // Remove from UI immediately
+      setNotifications(prev => prev.filter(n => n.id !== notificationToDelete.id));
     } catch (err) {
       console.error('Erreur lors de la suppression de la notification:', err);
-      // Fallback: Read-Modify-Write if arrayRemove failed?
-      // Let's implement Read-Modify-Write to be safe against detailed mismatches
-      try {
-        const userRef = doc(db, 'BiblioUser', currentUser.email);
-        // We use the ID to filter
-        const newNotifications = notifications.filter(n => n.id !== notificationToDelete.id);
-        await updateDoc(userRef, {
-          notifications: newNotifications
-        });
-      } catch (retryErr) {
-        console.error('Erreur retry delete:', retryErr);
-      }
     } finally {
       setDeletingId(null);
     }
