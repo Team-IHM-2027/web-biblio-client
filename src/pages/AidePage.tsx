@@ -33,6 +33,7 @@ const Header: FC = () => {
 // 3. Mock du Footer
 const Footer: FC = () => {
     const { orgSettings } = useConfig();
+    //@ts-ignore
     const secondaryColor = orgSettings?.Theme?.Secondary || '#1b263b';
     const organizationName = orgSettings?.Name || 'BiblioENSPY';
 

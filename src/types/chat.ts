@@ -22,6 +22,7 @@ export interface Conversation {
   unreadByUser?: boolean;
 }
 
+
 export interface Message extends SharedMessage {
   conversationId: string;
   senderId: 'user' | 'admin';

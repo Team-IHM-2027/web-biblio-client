@@ -2,7 +2,6 @@
 import { Outlet, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import Header from '../components/layout/Header.tsx';
-import Footer from '../components/layout/Footer.tsx';
 import { ChatAssistant } from '../components/ChatAssistant/ChatAssistant.tsx';
 import { useAuth } from '../contexts/AuthContext.tsx';
 

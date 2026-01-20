@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Globe, ExternalLink, Clock, Award, BookOpen, Play } from 'lucide-react';
-import { collection, getDocs, query, limit, where } from 'firebase/firestore';
+import { collection, getDocs, query, limit } from 'firebase/firestore';
 import { db } from '../../configs/firebase';
 import { useConfig } from '../../contexts/ConfigContext';
 

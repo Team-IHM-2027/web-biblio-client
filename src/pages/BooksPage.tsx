@@ -110,6 +110,7 @@ const BooksPage: React.FC = () => {
             }
 
             // Validate user data
+            //@ts-ignore
             const userName = currentUser.name || currentUser.username || 'Utilisateur';
             const userEmail = currentUser.email;
             

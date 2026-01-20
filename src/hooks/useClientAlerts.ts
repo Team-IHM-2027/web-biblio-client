@@ -14,7 +14,7 @@ const LAST_ALERT_KEY = 'lastClientAlertId';
 
 export const useClientAlerts = () => {
     const [activeAlert, setActiveAlert] = useState<ClientAlert | null>(null);
-    const [lastSeenId, setLastSeenId] = useState<string | null>(null);
+    const [_lastSeenId, setLastSeenId] = useState<string | null>(null);
 
     useEffect(() => {
         const q = query(
@@ -31,8 +31,8 @@ export const useClientAlerts = () => {
                 }
 
                 const next = snapshot.docs.map((docSnap) => ({
-                    id: docSnap.id,
-                    ...(docSnap.data() as ClientAlert)
+                    ...(docSnap.data() as ClientAlert),
+                    id: docSnap.id
                 }));
 
                 next.sort((a, b) => {

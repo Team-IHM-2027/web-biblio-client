@@ -16,7 +16,7 @@ const AuthPage: React.FC = () => {
     const location = useLocation();
     const [mode, setMode] = useState<AuthMode>('login');
     const [emailToVerify, setEmailToVerify] = useState<string>('');
-    const [checkingVerification, setCheckingVerification] = useState(false);
+    const [_checkingVerification, setCheckingVerification] = useState(false);
     const [showBlockingAlert, setShowBlockingAlert] = useState(false);
     const [blockingReason, setBlockingReason] = useState('');
 

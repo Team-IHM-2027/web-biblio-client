@@ -3,7 +3,6 @@ import { useConfig } from '../contexts/ConfigContext';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 
 import ResourcesSection from '../components/home/ResourcesSection.tsx';
-import Statistics from '../components/home/Statistics.tsx';
 import OnlineLearningSection from '../components/home/OnlineLearningSection.tsx';
 import Hero from "../components/home/Hero.tsx";
 import LibrarySchedule from "../components/home/LibrarySchedule.tsx";

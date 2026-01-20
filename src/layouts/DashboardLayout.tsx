@@ -7,12 +7,10 @@ import {
   Calendar,
   MessageCircle,
   Clock,
-  Bell,
   LogOut,
   ChevronLeft,
   ChevronRight,
   BookOpen,
-  Settings,
   Menu,
 
 } from 'lucide-react';

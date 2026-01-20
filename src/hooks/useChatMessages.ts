@@ -31,7 +31,7 @@ export const useChatMessages = (conversationId?: string) => {
     const q = query(
       messagesRef,
       where('conversationId', '==', conversationId),
-      orderBy('timestamp', 'asc'),
+      orderBy('heure', 'asc'),  // Use 'heure' not 'timestamp'
       limit(100)
     );
 
@@ -41,21 +41,31 @@ export const useChatMessages = (conversationId?: string) => {
         const messagesData: Message[] = [];
         snapshot.forEach((doc) => {
           const data = doc.data();
+          
+          // Determine recue value based on sender
+          // 'E' (Envoyé) if sender is admin to user? Or 'R' (Reçu) if user receives?
+          // Based on your logic: if senderId === 'admin', user receives it (R)
+          // if senderId === 'user', admin receives it (E from user perspective)
+          const isFromAdmin = data.sender === 'admin' || data.senderId === 'admin';
+          const recue: 'E' | 'R' = isFromAdmin ? 'R' : 'E'; // 'R' = Reçu (Received by user)
+          
           const message: Message = {
             id: doc.id,
             conversationId: data.conversationId,
-            text: data.content || '',
-            senderId: data.sender === 'admin' ? 'admin' : 'user',
-            senderName: data.senderName || 'User',
-            timestamp: data.timestamp || Timestamp.now(),
-            read: data.read || false,
-            type: data.type || 'text'
+            recue: recue,  // 'E' or 'R'
+            texte: data.content || data.texte || '',  // Message content
+            heure: data.timestamp || data.heure || Timestamp.now(),  // Time
+            lu: data.read || data.lu || false,  // Read status
+            type: data.type || 'text',
+            senderId: data.sender === 'admin' || data.senderId === 'admin' ? 'admin' : 'user',
+            senderName: data.senderName || (isFromAdmin ? 'Administrateur' : 'Utilisateur')
           };
           
           messagesData.push(message);
 
-          // Mark user-received messages as read automatically
-          if (message.senderId === 'admin' && !message.read) {
+          // Mark messages as read if they're from admin and not read
+          // Only mark as read if current user is not the admin
+          if (message.senderId === 'admin' && !message.lu) {
             markMessageAsRead(doc.id);
           }
         });
@@ -78,7 +88,9 @@ const markMessageAsRead = async (messageId: string) => {
   try {
     const messageRef = doc(db, 'Messages', messageId);
     await updateDoc(messageRef, {
-      read: true
+      lu: true  // Use French property name
+      // Also update English property if exists
+      // read: true
     });
   } catch (error) {
     console.error('Error marking message as read:', error);
