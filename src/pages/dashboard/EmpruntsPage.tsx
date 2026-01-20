@@ -4,7 +4,7 @@ import { authService } from "../../services/auth/authService";
 import { BiblioUser, TabEtatEntry } from "../../types/auth";
 import { useConfig } from "../../contexts/ConfigContext";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
-import { Clock, Calendar, CheckCircle } from "lucide-react";
+import { Calendar, CheckCircle } from "lucide-react";
 
 // Type local pour l'affichage
 type Reservation = {
@@ -19,9 +19,10 @@ type Reservation = {
 };
 
 const EmpruntsPage: React.FC = () => {
-  const navigate = useNavigate();
+  //@ts-ignore
+  const _navigate = useNavigate();
   const { orgSettings } = useConfig();
-  const [currentUser, setCurrentUser] = useState<BiblioUser | null>(null);
+  const [_currentUser, setCurrentUser] = useState<BiblioUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [loans, setLoans] = useState<Reservation[]>([]);
 
@@ -46,7 +47,7 @@ const EmpruntsPage: React.FC = () => {
 
             // Filter for 'emprunt' status only
             if (etat === 'emprunt' && Array.isArray(tabEtat)) {
-              const [idDoc, nameDoc, categorie, image] = tabEtat;
+              const [_idDoc, nameDoc, categorie, image] = tabEtat;
 
               mapped.push({
                 id: i,

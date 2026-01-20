@@ -316,7 +316,8 @@ export class AssistantApi {
         allBooksSnapshot.forEach((doc) => {
           const data = doc.data();
           const bookTitle = data.name || data.title || '';
-          const bookAuthor = data.author || data.auteur || '';
+          //@ts-ignore
+          const _bookAuthor = data.author || data.auteur || '';
           
           if (bookTitle.toLowerCase().includes(bookName.toLowerCase())) {
             console.log(`[AssistantApi] Partial match found: "${bookTitle}"`);

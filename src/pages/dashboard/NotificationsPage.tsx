@@ -9,7 +9,8 @@ import { Bell, CheckCircle, Info, AlertTriangle, Trash2, MailOpen } from 'lucide
 const NotificationsPage = () => {
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [loading, setLoading] = useState(true);
-    const navigate = useNavigate();
+    //@ts-ignore
+    const _navigate = useNavigate();
 
     useEffect(() => {
         const fetchNotifications = async () => {

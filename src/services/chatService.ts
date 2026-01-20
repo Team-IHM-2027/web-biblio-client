@@ -1,13 +1,7 @@
 import {
-  collection,
-  query,
-  where,
-  getDocs,
   Timestamp,
   updateDoc,
   doc,
-  orderBy,
-  limit,
   onSnapshot,
   arrayUnion,
   getDoc
@@ -18,7 +12,7 @@ import type { Conversation, SharedMessage } from '../types/chat';
 // WebSocket instance
 let wsInstance: WebSocket | null = null;
 
-export const initializeWebSocket = (userId: string, userName: string): Promise<void> => {
+export const initializeWebSocket = (userId: string): Promise<void> => {
   return new Promise((resolve, reject) => {
     try {
       const WS_URL = 'ws://192.168.43.78:3000';

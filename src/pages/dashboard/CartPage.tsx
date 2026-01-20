@@ -1,6 +1,6 @@
 // src/pages/dashboard/CartPage.tsx
 import { useState } from 'react';
-import { ShoppingCart, Trash2, Plus, Minus, CreditCard, Book, ArrowRight, ChevronLeft } from 'lucide-react';
+import { ShoppingCart, Trash2, Plus, Minus, CreditCard, Book, ChevronLeft } from 'lucide-react';
 
 // Définition des variables de couleur
 const COLORS = {
@@ -293,18 +293,18 @@ const SuggestedProductButton = ({ title, price }: { title: string, price: number
 };
 
 // Section d'articles suggérés
-const SuggestedProducts = () => {
-  return (
-    <div className="bg-white rounded-xl shadow-md p-6">
-      <h3 className="text-lg font-bold mb-4" style={{ color: COLORS.secondary }}>Vous pourriez aimer</h3>
-      <div className="space-y-3">
-        <SuggestedProductButton title="Les Misérables" price={18.99} />
-        <SuggestedProductButton title="Notre-Dame de Paris" price={14.50} />
-        <SuggestedProductButton title="L'Étranger (Numérique)" price={7.99} />
-      </div>
-    </div>
-  );
-};
+// const SuggestedProducts = () => {
+//   return (
+//     <div className="bg-white rounded-xl shadow-md p-6">
+//       <h3 className="text-lg font-bold mb-4" style={{ color: COLORS.secondary }}>Vous pourriez aimer</h3>
+//       <div className="space-y-3">
+//         <SuggestedProductButton title="Les Misérables" price={18.99} />
+//         <SuggestedProductButton title="Notre-Dame de Paris" price={14.50} />
+//         <SuggestedProductButton title="L'Étranger (Numérique)" price={7.99} />
+//       </div>
+//     </div>
+//   );
+// };
 
 // Composant principal de la page du panier
 const CartPage = () => {
