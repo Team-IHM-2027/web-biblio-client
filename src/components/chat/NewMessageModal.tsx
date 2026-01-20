@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { findOrCreateConversation } from '../../services/chatService';
+import { getUserConversation } from '../../services/chatService';
 import { useSafeAuth } from '../../hooks/useSafeAuth';
 import Button from '../ui/Button';
 import { X } from 'lucide-react';
@@ -29,15 +29,24 @@ const NewMessageModal: React.FC<NewMessageModalProps> = ({
     setError(null);
 
     try {
-      const conversationId = await findOrCreateConversation(
-        currentUser.email,
-        currentUser.name
-      );
-      onMessageSent(conversationId);
+      // getUserConversation returns Conversation | null
+      const conversation = await getUserConversation(currentUser.email);
+      
+      // Check if conversation exists and has an id
+      if (!conversation) {
+        throw new Error('La conversation n\'a pas pu être créée');
+      }
+      
+      if (!conversation.id) {
+        throw new Error('ID de conversation manquant');
+      }
+      
+      // Pass the conversation ID string to onMessageSent
+      onMessageSent(conversation.id);
       onClose();
     } catch (err) {
       console.error('Error creating conversation:', err);
-      setError('Erreur lors de la création de la conversation');
+      setError(err instanceof Error ? err.message : 'Erreur lors de la création de la conversation');
     } finally {
       setLoading(false);
     }

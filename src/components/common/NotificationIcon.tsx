@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Bell, X } from 'lucide-react';
 import { BiblioUser } from '../../types/auth';
 import { Link } from 'react-router-dom';
-import { doc, onSnapshot, updateDoc, arrayRemove, deleteDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc, deleteDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../configs/firebase';
 
 interface Props {

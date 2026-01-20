@@ -4,7 +4,6 @@ import {
     Search, 
     X, 
     Filter,
-    BookOpen,
     User,
     Building,
     Tag,
@@ -45,7 +44,8 @@ const AdvancedSearchBar: React.FC<AdvancedSearchBarProps> = ({
     const searchRef = useRef<HTMLDivElement>(null);
 
     const primaryColor = orgSettings?.Theme?.Primary || '#ff8c00';
-    const secondaryColor = orgSettings?.Theme?.Secondary || '#1b263b';
+    //@ts-ignore
+    const _secondaryColor = orgSettings?.Theme?.Secondary || '#1b263b'; // Prefix with underscore
 
     // Déclencher la recherche quand les filtres changent
     useEffect(() => {
@@ -97,7 +97,9 @@ const AdvancedSearchBar: React.FC<AdvancedSearchBarProps> = ({
             {/* Barre de recherche principale */}
             <div className={`flex items-center p-4 transition-all duration-200 ${
                 isFocused ? 'ring-2 ring-opacity-50' : ''
-            }`} style={{ ringColor: `${primaryColor}50` }}>
+            }`} style={{ 
+                boxShadow: isFocused ? `0 0 0 3px ${primaryColor}50` : 'none' 
+            }}>
                 <Search className="w-5 h-5 text-gray-400 mr-3 flex-shrink-0" />
                 
                 <input
@@ -153,8 +155,11 @@ const AdvancedSearchBar: React.FC<AdvancedSearchBarProps> = ({
                                 placeholder="Nom de l'auteur"
                                 value={filters.author}
                                 onChange={(e) => handleFilterChange('author', e.target.value)}
-                                className="w-full p-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-opacity-50"
-                                style={{ focusRing: `${primaryColor}50` }}
+                                className="w-full p-2 border border-gray-200 rounded-lg text-sm focus:outline-none"
+                                style={{ 
+                                    boxShadow: 'none',
+                                    outline: 'none'
+                                }}
                             />
                         </div>
 
@@ -169,8 +174,11 @@ const AdvancedSearchBar: React.FC<AdvancedSearchBarProps> = ({
                                 placeholder="Maison d'édition"
                                 value={filters.publisher}
                                 onChange={(e) => handleFilterChange('publisher', e.target.value)}
-                                className="w-full p-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-opacity-50"
-                                style={{ focusRing: `${primaryColor}50` }}
+                                className="w-full p-2 border border-gray-200 rounded-lg text-sm focus:outline-none"
+                                style={{ 
+                                    boxShadow: 'none',
+                                    outline: 'none'
+                                }}
                             />
                         </div>
 
@@ -185,8 +193,11 @@ const AdvancedSearchBar: React.FC<AdvancedSearchBarProps> = ({
                                 placeholder="Genre ou domaine"
                                 value={filters.category}
                                 onChange={(e) => handleFilterChange('category', e.target.value)}
-                                className="w-full p-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-opacity-50"
-                                style={{ focusRing: `${primaryColor}50` }}
+                                className="w-full p-2 border border-gray-200 rounded-lg text-sm focus:outline-none"
+                                style={{ 
+                                    boxShadow: 'none',
+                                    outline: 'none'
+                                }}
                             />
                         </div>
 
@@ -202,8 +213,11 @@ const AdvancedSearchBar: React.FC<AdvancedSearchBarProps> = ({
                                     placeholder="De"
                                     value={filters.yearFrom}
                                     onChange={(e) => handleFilterChange('yearFrom', e.target.value)}
-                                    className="flex-1 p-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-opacity-50"
-                                    style={{ focusRing: `${primaryColor}50` }}
+                                    className="flex-1 p-2 border border-gray-200 rounded-lg text-sm focus:outline-none"
+                                    style={{ 
+                                        boxShadow: 'none',
+                                        outline: 'none'
+                                    }}
                                     min="1800"
                                     max={new Date().getFullYear()}
                                 />
@@ -213,8 +227,11 @@ const AdvancedSearchBar: React.FC<AdvancedSearchBarProps> = ({
                                     placeholder="À"
                                     value={filters.yearTo}
                                     onChange={(e) => handleFilterChange('yearTo', e.target.value)}
-                                    className="flex-1 p-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-opacity-50"
-                                    style={{ focusRing: `${primaryColor}50` }}
+                                    className="flex-1 p-2 border border-gray-200 rounded-lg text-sm focus:outline-none"
+                                    style={{ 
+                                        boxShadow: 'none',
+                                        outline: 'none'
+                                    }}
                                     min="1800"
                                     max={new Date().getFullYear()}
                                 />

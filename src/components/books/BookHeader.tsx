@@ -13,9 +13,7 @@ import {
     Package,
     Calendar,
     User,
-    MessageSquare,
-    BookOpen
-} from 'lucide-react';
+    MessageSquare} from 'lucide-react';
 
 interface BookHeaderProps {
     book: BiblioBook;
@@ -39,7 +37,7 @@ const BookHeader: React.FC<BookHeaderProps> = ({
     commentsWithUserData = []
 }) => {
     const { orgSettings } = useConfig();
-    const [imageError, setImageError] = useState(false);
+    const [_imageError, setImageError] = useState(false);
     const [showShareMenu, setShowShareMenu] = useState(false);
 
     const primaryColor = orgSettings?.Theme?.Primary || '#ff8c00';

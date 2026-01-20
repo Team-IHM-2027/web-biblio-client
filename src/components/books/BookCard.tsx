@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useConfig } from '../../contexts/ConfigContext';
-import { Heart, ShoppingCart, CheckCircle, AlertCircle, BookOpen, User, Building, Package, Clock, Copy } from 'lucide-react';
+import { Heart, ShoppingCart, CheckCircle, AlertCircle, User, Building, Package, Clock, Copy } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Timestamp, doc, arrayUnion, writeBatch, increment } from "firebase/firestore";
 import { db, auth } from '../../configs/firebase';
