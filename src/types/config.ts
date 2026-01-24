@@ -19,6 +19,7 @@ export interface Theme {
 export interface OrgSettings {
     Address: string;
     Contact: Contact;
+    MaintenanceMode?: boolean;
     LateReturnPenalties: string[];
     Logo: string;
     MaximumSimultaneousLoans: number;

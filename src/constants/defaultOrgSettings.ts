@@ -9,6 +9,7 @@ export const defaultOrgSettings: OrgSettings = {
 		Phone: "+237 123456789",
 		WhatsApp: "+237 123456789"
 	},
+	MaintenanceMode: false,
 	LateReturnPenalties: [""],
 	Logo: "",
 	MaximumSimultaneousLoans: 3,

@@ -18,6 +18,7 @@ import ThesisDetailsPage from "./pages/ThesisDetailsPage.tsx";
 import AidePage from "./pages/AidePage.tsx";
 import ClientAlertModal from './components/common/ClientAlertModal';
 import BlockingAlertPage from './pages/BlockingAlertPage';
+import MaintenanceGate from './components/common/MaintenanceGate';
 
 const router = createBrowserRouter([
     {
@@ -100,8 +101,10 @@ function App() {
     return (
         <ConfigProvider>
             <AuthProvider>
-                <RouterProvider router={router} />
-                <ClientAlertModal />
+                <MaintenanceGate>
+                    <RouterProvider router={router} />
+                    <ClientAlertModal />
+                </MaintenanceGate>
             </AuthProvider>
         </ConfigProvider>
     );
