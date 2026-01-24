@@ -118,6 +118,7 @@ class ConfigService {
             LateReturnPenalties: ["100 FCFA par jour de retard"],
             Logo: "",
             MaximumSimultaneousLoans: 3,
+            MaintenanceMode: false,
             Name: "BiblioENSPY",
             OpeningHours: {
                 Monday: '{"open": "08:00", "close": "18:00"}',
