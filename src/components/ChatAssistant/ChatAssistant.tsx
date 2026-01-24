@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { AssistantApi } from '../../services/api/AssistantApi';
 import { useAuth } from '../../contexts/AuthContext';
-import { chatService } from '../../services/chat/chatService';
 import './ChatAssistant.css';
 
 // Icônes
@@ -57,6 +56,7 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
   orgName = 'OrgSettings',
   apiUrl,
 }) => {
+  //@ts-ignore
   const { currentUser } = useAuth() || {};
 
   const [assistantApi] = useState(() => {
@@ -66,7 +66,14 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: 'welcome',
+      content: welcomeMessage,
+      sender: 'assistant',
+      timestamp: new Date(),
+    }
+  ]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [quickSuggestions, setQuickSuggestions] = useState<Array<{ text: string, query: string }>>([]);
@@ -92,15 +99,15 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
           const libraryInfo = await assistantApi.getLibraryInfo(orgName);
           if (libraryInfo) {
             setLibraryName(libraryInfo.name);
-
-            if (messages.length === 0 && isOpen) {
-              setMessages([{
-                id: 'welcome',
-                content: `Bonjour! Je suis l'assistant de la bibliothèque ${libraryInfo.name}. Comment puis-je vous aider aujourd'hui ?`,
-                sender: 'assistant',
-                timestamp: new Date(),
-              }]);
-            }
+            
+            // Update welcome message with library name
+            setMessages(prev => 
+              prev.map(msg => 
+                msg.id === 'welcome' 
+                  ? {...msg, content: `Bonjour! Je suis l'assistant de la bibliothèque ${libraryInfo.name}. Comment puis-je vous aider aujourd'hui ?`}
+                  : msg
+              )
+            );
           }
 
           const suggestions = await assistantApi.getQuickSuggestions(orgName);
@@ -155,62 +162,6 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
       }, 300);
     }
   }, [isOpen, isMinimized]);
-
-  // Synchronisation avec Firestore et WebSockets
-  useEffect(() => {
-    if (!currentUser) return;
-
-    let unsubscribe: (() => void) | undefined;
-
-    const setupChat = async () => {
-      // 1. Connexion WebSocket pour le chat en temps réel avec l'admin
-      chatService.connectWebSocket(currentUser.email, (text) => {
-        chatService.receiveMessage(currentUser.id, currentUser.email, text);
-      });
-
-      // 2. Souscription aux messages Firestore
-      unsubscribe = await chatService.subscribeToMessages(
-        currentUser.id,
-        currentUser.email,
-        (fireMessages) => {
-          const mappedMessages: Message[] = fireMessages
-            .filter(msg => msg.type === 'bot')
-            .map(msg => ({
-              id: msg.id || Math.random().toString(36).substr(2, 9),
-              content: msg.texte,
-              sender: msg.recue === 'E' ? 'user' : 'assistant',
-              timestamp: (msg.heure as any)?.toDate ? (msg.heure as any).toDate() : new Date((msg.heure as any))
-            }));
-
-          // Si pas de messages, ajouter le message de bienvenue
-          if (mappedMessages.length === 0) {
-            setMessages([{
-              id: 'welcome',
-              content: welcomeMessage,
-              sender: 'assistant',
-              timestamp: new Date(),
-            }]);
-          } else {
-            setMessages(mappedMessages);
-          }
-        }
-      );
-    };
-
-    setupChat();
-
-    return () => {
-      chatService.disconnect();
-      if (unsubscribe) unsubscribe();
-    };
-  }, [currentUser, welcomeMessage]);
-
-  // Marquage comme lu à l'ouverture du chat
-  useEffect(() => {
-    if (isOpen && currentUser) {
-      chatService.markAsRead(currentUser.id, currentUser.email);
-    }
-  }, [isOpen, currentUser]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -320,7 +271,7 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
 
     const userMessageContent = message;
 
-    // Add user message to UI immediately for responsiveness (Firestore will update it soon)
+    // Add user message to UI immediately for responsiveness
     const userMessage: Message = {
       id: Date.now().toString(),
       content: userMessageContent,
@@ -333,11 +284,6 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
     setIsLoading(true);
 
     try {
-      // 1. Send to Firestore & WebSocket
-      if (currentUser) {
-        await chatService.sendMessage(currentUser.id, currentUser.email, userMessageContent);
-      }
-
       if (!apiAvailable || offlineMode) {
         throw new Error('API non disponible');
       }
@@ -352,16 +298,20 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
       };
       setMessages(prev => [...prev, typingMessage]);
 
-      // 2. Bot Response
+      // Bot Response
       const response = await assistantApi.getAssistantResponse(userMessageContent, orgName);
 
       // Remove typing indicator
       setMessages(prev => prev.filter(msg => msg.id !== 'typing'));
 
-      // 3. Save Bot Response to Firestore
-      if (currentUser) {
-        await chatService.receiveMessage(currentUser.id, currentUser.email, response);
-      }
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        content: response,
+        sender: 'assistant',
+        timestamp: new Date(),
+      };
+
+      setMessages(prev => [...prev, assistantMessage]);
 
       // Update check logic...
       const lowerMessage = message.toLowerCase();
@@ -402,7 +352,7 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
       if (offlineMode) {
         errorMessage = {
           id: (Date.now() + 1).toString(),
-          content: "Je suis actuellement hors ligne. Votre message a été enregistré.",
+          content: "Je suis actuellement hors ligne. Veuillez réessayer plus tard.",
           sender: 'assistant',
           timestamp: new Date(),
         };
@@ -483,7 +433,7 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
   const handleQuickSuggestion = (suggestion: { text: string; query: string }) => {
     if (suggestion.text.includes("🔍")) {
       // For book search, start the step-by-step process
-      resetBookSearch(); // Clear any existing state
+      resetBookSearch();
 
       // Add a prompt message
       const promptMessage: Message = {
@@ -494,18 +444,18 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
       };
       setMessages(prev => [...prev, promptMessage]);
 
-      // Set book search step AFTER clearing input
+      // Set book search step
       setBookSearchStep('title');
-      setInputValue(''); // Ensure input is clear
+      setInputValue('');
 
-      // Focus the input field with a slight delay
+      // Focus the input field
       setTimeout(() => {
         if (inputRef.current) {
           inputRef.current.focus();
         }
       }, 100);
     } else {
-      // For other suggestions, just set the query
+      // For other suggestions, set the query and trigger send
       setInputValue(suggestion.query);
       resetBookSearch();
 
@@ -513,12 +463,15 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
       if (inputRef.current) {
         inputRef.current.focus();
       }
+      
+      // Auto-send after a short delay
+      setTimeout(() => {
+        handleSendMessage();
+      }, 100);
     }
   };
 
-  // Also update the handleInputChange function to handle all cases:
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    // Always allow user to change the input
     setInputValue(e.target.value);
   };
 
