@@ -411,18 +411,45 @@ const Header: React.FC = () => {
                                         </NavLink>
 
                                         <NavLink
-                                            to="/dashboard/notifications"
+                                            to="/dashboard/messages"
                                             className="flex items-center px-2 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
                                             onClick={() => setIsMenuOpen(false)}
                                         >
-                                            <Bell className="w-4 h-4 mr-3" />
-                                            Notifications
-                                            {unreadNotifications > 0 && (
+                                            <MessageCircle className="w-4 h-4 mr-3" />
+                                            Messages
+                                            {unreadMessages > 0 && (
                                                 <span className="ml-auto px-2 py-1 text-xs bg-red-500 text-white rounded-full">
-                                                    {unreadNotifications}
+                                                    {unreadMessages}
                                                 </span>
                                             )}
                                         </NavLink>
+
+                                        <NavLink
+                                            to="/dashboard/consultations"
+                                            className="flex items-center px-2 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
+                                            onClick={() => setIsMenuOpen(false)}
+                                        >
+                                            <History className="w-4 h-4 mr-3" />
+                                            Historique & Réservations
+                                            {reservationCount > 0 && (
+                                                <span
+                                                    className="ml-auto px-2 py-1 text-xs text-white rounded-full"
+                                                    style={{ backgroundColor: primaryColor }}
+                                                >
+                                                    {reservationCount}
+                                                </span>
+                                            )}
+                                        </NavLink>
+
+                                        <NavLink
+                                            to="/dashboard/favorites"
+                                            className="flex items-center px-2 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
+                                            onClick={() => setIsMenuOpen(false)}
+                                        >
+                                            <Heart className="w-4 h-4 mr-3" />
+                                            Favoris
+                                        </NavLink>
+
                                         <button
                                             onClick={handleSignOut}
                                             className="flex items-center w-full px-2 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
