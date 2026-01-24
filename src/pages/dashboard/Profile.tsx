@@ -149,8 +149,8 @@ const ProfilePage = () => {
                 <InfoField label="Adresse Email" value={user.email} editable={false} />
                 <InfoField label="Matricule" value={user.matricule} editable={false} />
                 <InfoField label="Téléphone" value={user.tel} />
-                <InfoField label="Département" value={getDepartmentName(user.departement) || 'Non spécifié'} editable={false} />
-                <InfoField label="Niveau" value={user.niveau ? user.niveau.toUpperCase() : 'Non spécifié'} editable={false} />
+                <InfoField label="Département" value={getDepartmentName(user.departement)} editable={false} />
+                <InfoField label="Niveau" value={user.level ? user.level.toUpperCase() : 'Non spécifié'} editable={false} />
                 <InfoField label="Date d'inscription" value={user.createdAt.toDate().toLocaleDateString('fr-FR')} editable={false} />
                 <InfoField label="Dernière connexion" value={user.lastLoginAt.toDate().toLocaleString('fr-FR')} editable={false} />
             </div>
