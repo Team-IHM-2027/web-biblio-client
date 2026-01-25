@@ -1,4 +1,4 @@
-import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
+import { doc, getDoc, collection, getDocs, onSnapshot } from 'firebase/firestore';
 import { db } from '../configs/firebase';
 import { OrgSettings, AppSettings } from '../types/config';
 
@@ -84,6 +84,51 @@ class ConfigService {
         this.orgSettingsCache = null;
         this.appSettingsCache = null;
         this.lastFetch = 0;
+    }
+
+    // S'abonner aux changements des paramÃ¨tres d'organisation (ex: Logo)
+    subscribeOrgSettings(onUpdate: (data: OrgSettings) => void, onError?: (error: Error) => void) {
+        const orgSettingsRef = doc(db, 'Configuration', 'OrgSettings');
+
+        return onSnapshot(
+            orgSettingsRef,
+            (docSnap) => {
+                const now = Date.now();
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data() as OrgSettings;
+
+                    // VÃ©rifier que les donnÃ©es essentielles sont prÃ©sentes
+                    if (!data.Name || !data.Theme) {
+                        const defaults = this.getDefaultOrgSettings();
+                        this.orgSettingsCache = defaults;
+                        this.lastFetch = now;
+                        onUpdate(defaults);
+                        return;
+                    }
+
+                    this.orgSettingsCache = data;
+                    this.lastFetch = now;
+
+                    // Appliquer le thÃ¨me immÃ©diatement
+                    this.applyThemeToDOM(data.Theme);
+
+                    onUpdate(data);
+                    return;
+                }
+
+                const defaults = this.getDefaultOrgSettings();
+                this.orgSettingsCache = defaults;
+                this.lastFetch = now;
+                onUpdate(defaults);
+            },
+            (error) => {
+                console.error('âŒ Error subscribing to org settings:', error);
+                if (onError) {
+                    onError(error instanceof Error ? error : new Error('Unknown error'));
+                }
+            }
+        );
     }
 
     // Force le rechargement depuis Firebase

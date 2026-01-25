@@ -80,6 +80,23 @@ export const ConfigProvider: React.FC<ConfigProviderProps> = ({ children }) => {
         fetchSettings();
     }, []);
 
+    useEffect(() => {
+        const unsubscribe = configService.subscribeOrgSettings(
+            (data) => {
+                setOrgSettings(data);
+            },
+            (err) => {
+                console.error('âŒ Org settings realtime error:', err);
+            }
+        );
+
+        return () => {
+            if (unsubscribe) {
+                unsubscribe();
+            }
+        };
+    }, []);
+
     // Debug: Log des changements d'état
     useEffect(() => {
     }, [orgSettings, appSettings, isLoading, error]);
