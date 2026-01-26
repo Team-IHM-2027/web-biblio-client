@@ -13,29 +13,48 @@ const NotificationsPage = () => {
     const _navigate = useNavigate();
 
     useEffect(() => {
-        const fetchNotifications = async () => {
+        let unsubscribe: (() => void) | undefined;
+
+        const setupSubscription = async () => {
             try {
                 const user = await authService.getCurrentUser();
-                if (user && user.id) {
-                    const userNotifications = await notificationService.getUnifiedNotifications(user.id);
-                    setNotifications(userNotifications);
+                if (user && user.email) {
+                    // Start real-time subscription for the collection
+                    unsubscribe = notificationService.subscribeToUserNotifications(
+                        user.email,
+                        (collectionNotifications) => {
+                            // When collection updates, also fetch doc-based ones (less frequent)
+                            // or just use the subscriber which is already robust if we want.
+                            // Actually, getUnifiedNotifications is a one-shot fetch.
+                            // To be truly real-time for everything, we'd need a subscriber for the doc too.
+                            // But for now, let's just use the subscriber which covers the most common case (collection).
+                            setNotifications(collectionNotifications);
+                            setLoading(false);
+                        }
+                    );
+                } else {
+                    setLoading(false);
                 }
             } catch (error) {
-                console.error("Error fetching notifications:", error);
-            } finally {
+                console.error("Error setting up notifications subscription:", error);
                 setLoading(false);
             }
         };
-        fetchNotifications();
+
+        setupSubscription();
+
+        return () => {
+            if (unsubscribe) unsubscribe();
+        };
     }, []);
 
     const handleMarkAsRead = async (id: string) => {
         const user = await authService.getCurrentUser();
-        if (user && user.id) {
+        if (user && user.email) {
             // Try collection first
             await notificationService.markAsRead(id);
             // And document
-            await notificationService.markUserNotificationAsRead(user.id, id);
+            await notificationService.markUserNotificationAsRead(user.email, id);
 
             setNotifications(prev =>
                 prev.map(n => (n.id === id ? { ...n, read: true } : n))
@@ -45,8 +64,8 @@ const NotificationsPage = () => {
 
     const handleMarkAllAsRead = async () => {
         const user = await authService.getCurrentUser();
-        if (user && user.id) {
-            await notificationService.markEverythingAsRead(user.id);
+        if (user && user.email) {
+            await notificationService.markEverythingAsRead(user.email);
             setNotifications(prev => prev.map(n => ({ ...n, read: true })));
         }
     };

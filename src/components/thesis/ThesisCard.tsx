@@ -9,7 +9,7 @@ import {
     Star,
     BookOpen
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { BiblioThesis } from '../../types/thesis';
 import { doc, writeBatch, Timestamp, arrayUnion } from 'firebase/firestore';
 import { db } from '../../configs/firebase';
@@ -38,19 +38,27 @@ const isKeyOfBiblioUser = (key: string, max: number): key is keyof BiblioUser =>
 };
 
 const ThesisCard: React.FC<ThesisCardProps> = ({
-                                                   thesis,
-                                                   viewMode = 'grid',
-                                                   onToggleFavorite,
-                                                   isFavorite = false,
-                                                   className = ""
-                                               }) => {
+    thesis,
+    viewMode = 'grid',
+    onToggleFavorite,
+    isFavorite = false,
+    className = ""
+}) => {
     const { orgSettings } = useConfig();
     const [imageError, setImageError] = useState(false);
     const [isReserving, setIsReserving] = useState(false);
     const [currentUser, setCurrentUser] = useState<BiblioUser | null>(null);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
-
+    const navigate = useNavigate();
     const primaryColor = orgSettings?.Theme?.Primary || '#ff8c00';
+
+    const isReserved = currentUser && (
+        currentUser.tabEtat1?.[0] === thesis.id ||
+        currentUser.tabEtat2?.[0] === thesis.id ||
+        currentUser.tabEtat3?.[0] === thesis.id ||
+        currentUser.tabEtat4?.[0] === thesis.id ||
+        currentUser.tabEtat5?.[0] === thesis.id
+    );
 
     // Vérifier l'authentification au montage et lors des changements
     useEffect(() => {
@@ -70,9 +78,11 @@ const ThesisCard: React.FC<ThesisCardProps> = ({
     }, []);
 
     // Gérer la réservation
-    const handleReserve = async (e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
+    const handleReserve = async () => {
+        if (isReserved) {
+            navigate("/dashboard/consultations");
+            return;
+        }
 
         if (!isAuthenticated || !currentUser) {
             alert("Vous devez être connecté pour réserver un mémoire.");
@@ -206,11 +216,10 @@ const ThesisCard: React.FC<ThesisCardProps> = ({
                                     {/* Bouton favoris */}
                                     <button
                                         onClick={handleToggleFavorite}
-                                        className={`p-2 rounded-full transition-all duration-200 ${
-                                            isFavorite
-                                                ? 'bg-red-500 text-white'
-                                                : 'bg-white/20 backdrop-blur-sm text-white hover:bg-red-500'
-                                        }`}
+                                        className={`p-2 rounded-full transition-all duration-200 ${isFavorite
+                                            ? 'bg-red-500 text-white'
+                                            : 'bg-white/20 backdrop-blur-sm text-white hover:bg-red-500'
+                                            }`}
                                     >
                                         <Heart size={16} fill={isFavorite ? 'currentColor' : 'none'} />
                                     </button>
@@ -292,11 +301,10 @@ const ThesisCard: React.FC<ThesisCardProps> = ({
                                         <Star
                                             key={star}
                                             size={14}
-                                            className={`${
-                                                star <= Math.round(averageRating)
-                                                    ? 'text-yellow-400 fill-current'
-                                                    : 'text-gray-300'
-                                            }`}
+                                            className={`${star <= Math.round(averageRating)
+                                                ? 'text-yellow-400 fill-current'
+                                                : 'text-gray-300'
+                                                }`}
                                         />
                                     ))}
                                 </div>
@@ -308,11 +316,11 @@ const ThesisCard: React.FC<ThesisCardProps> = ({
                     <div className="flex gap-2 mt-4">
                         <button
                             onClick={handleReserve}
-                            disabled={isReserving}
+                            disabled={isReserving && !isReserved}
                             className="flex-1 px-4 py-2 rounded-lg text-white font-medium transition-all duration-200 disabled:opacity-50"
                             style={{ backgroundColor: primaryColor }}
                         >
-                            {isReserving ? 'Réservation...' : 'Réserver'}
+                            {isReserving ? 'Réservation...' : isReserved ? 'Voir ma réservation' : 'Réserver'}
                         </button>
                     </div>
                 </div>
@@ -415,11 +423,10 @@ const ThesisCard: React.FC<ThesisCardProps> = ({
                                                 <Star
                                                     key={star}
                                                     size={14}
-                                                    className={`${
-                                                        star <= Math.round(averageRating)
-                                                            ? 'text-yellow-400 fill-current'
-                                                            : 'text-gray-300'
-                                                    }`}
+                                                    className={`${star <= Math.round(averageRating)
+                                                        ? 'text-yellow-400 fill-current'
+                                                        : 'text-gray-300'
+                                                        }`}
                                                 />
                                             ))}
                                         </div>
@@ -433,14 +440,14 @@ const ThesisCard: React.FC<ThesisCardProps> = ({
 
                         <div className="flex flex-col items-end space-y-3">
                             <div className="flex items-center space-x-2">
-                                <button
+                                {/* <button
                                     onClick={handleToggleFavorite}
                                     className={`p-2 rounded-full transition-all duration-200 ${
                                         isFavorite ? 'bg-red-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-red-500 hover:text-white'
                                     }`}
                                 >
                                     <Heart size={16} fill={isFavorite ? 'currentColor' : 'none'} />
-                                </button>
+                                </button> */}
                                 {thesis.pdfUrl && (
                                     <a
                                         href={thesis.pdfUrl}
@@ -456,12 +463,11 @@ const ThesisCard: React.FC<ThesisCardProps> = ({
                             <div className="flex items-center space-x-2">
                                 <button
                                     onClick={handleReserve}
-                                    disabled={isReserving || !isAuthenticated}
-                                    className={`py-2 px-4 rounded-lg font-medium transition-all duration-200 ${
-                                        isAuthenticated
-                                            ? `border-2 hover:shadow-lg ${isReserving ? 'opacity-75 cursor-not-allowed' : ''}`
-                                            : 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                                    }`}
+                                    disabled={(isReserving && !isReserved) || !isAuthenticated}
+                                    className={`py-2 px-4 rounded-lg font-medium transition-all duration-200 ${isAuthenticated
+                                        ? `border-2 hover:shadow-lg ${isReserving ? 'opacity-75 cursor-not-allowed' : ''}`
+                                        : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                                        }`}
                                     style={{
                                         borderColor: isAuthenticated ? primaryColor : undefined,
                                         color: isAuthenticated ? primaryColor : undefined
@@ -470,9 +476,11 @@ const ThesisCard: React.FC<ThesisCardProps> = ({
                                     {isReserving ? (
                                         <div className="flex items-center">
                                             <div className="w-4 h-4 border-2 border-t-transparent rounded-full animate-spin mr-2"
-                                                 style={{ borderColor: primaryColor }}></div>
+                                                style={{ borderColor: primaryColor }}></div>
                                             Réservation...
                                         </div>
+                                    ) : isReserved ? (
+                                        'Voir ma réservation'
                                     ) : isAuthenticated ? (
                                         <>
                                             <BookOpen size={16} className="mr-2 inline" />

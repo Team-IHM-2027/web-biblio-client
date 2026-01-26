@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useConfig } from '../../contexts/ConfigContext';
 import { Heart, ShoppingCart, CheckCircle, AlertCircle, User, Building, Package, Clock, Copy } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Timestamp, doc, arrayUnion, writeBatch, increment } from "firebase/firestore";
 import { db, auth } from '../../configs/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -77,8 +77,18 @@ const BookCard: React.FC<BookCardProps> = ({
     console.log('Image error state:', imageError); // Use it to avoid lint
     const [isReserving, setIsReserving] = useState(false);
     const [currentUser, setCurrentUser] = useState<BiblioUser | null>(null);
-
+    const navigate = useNavigate();
     const primaryColor = orgSettings?.Theme?.Primary || '#ff8c00';
+
+    const localIsReserved = currentUser && (
+        currentUser.tabEtat1?.[0] === book.id ||
+        currentUser.tabEtat2?.[0] === book.id ||
+        currentUser.tabEtat3?.[0] === book.id ||
+        currentUser.tabEtat4?.[0] === book.id ||
+        currentUser.tabEtat5?.[0] === book.id
+    );
+
+    const effectiveIsReserved = isReserved || localIsReserved;
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -129,7 +139,7 @@ const BookCard: React.FC<BookCardProps> = ({
     };
 
     const getStatusBadge = () => {
-        if (isReserved) {
+        if (effectiveIsReserved) {
             return {
                 text: 'En attente',
                 color: 'bg-yellow-100 text-yellow-800 border-yellow-200',
@@ -156,23 +166,15 @@ const BookCard: React.FC<BookCardProps> = ({
     }
 
     const handleReserve = async (e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
+        if (effectiveIsReserved) {
+            navigate("/dashboard/consultations");
+            return;
+        }
 
         // Utiliser la prop onReserve si fournie
         if (onReserve) {
             if (!userLoggedIn) {
                 alert("Vous devez être connecté pour réserver un livre.");
-                return;
-            }
-
-            if (isReserved) {
-                alert("Vous avez déjà réservé ce livre.");
-                return;
-            }
-
-            if (!isAvailable) {
-                alert("Ce livre n'est plus disponible.");
                 return;
             }
 
@@ -183,11 +185,6 @@ const BookCard: React.FC<BookCardProps> = ({
         // Ancienne logique de réservation (pour rétrocompatibilité)
         if (!currentUser || !isAvailable) {
             alert("Vous devez être connecté pour réserver un livre.");
-            return;
-        }
-
-        if (isReserved) {
-            alert("Vous avez déjà réservé ce livre.");
             return;
         }
 
@@ -259,13 +256,13 @@ const BookCard: React.FC<BookCardProps> = ({
     };
 
     const getReserveButtonText = () => {
-        if (isReserved) return 'En attente';
+        if (effectiveIsReserved) return 'Voir ma réservation';
         if (!isAvailable) return 'Indisponible';
         if (!currentUser) return 'Se connecter'; // Changé de userLoggedIn à currentUser
         return 'Réserver';
     };
 
-    const isReserveButtonDisabled = isReserved || !isAvailable || isReserving || isLoading;
+    const isReserveButtonDisabled = !effectiveIsReserved && (!isAvailable || isReserving || isLoading);
     const shouldShowLoginMessage = !currentUser && isAvailable && !isReserved;
 
     const statusBadge = getStatusBadge();
@@ -297,7 +294,7 @@ const BookCard: React.FC<BookCardProps> = ({
                             </div>
 
                             {/* Favorite Button */}
-                            {onToggleFavorite && (
+                            {/* {onToggleFavorite && (
                                 <button
                                     onClick={handleToggleFavorite}
                                     className={`absolute top-2 right-2 p-2 rounded-full transition-all duration-200 z-20 shadow-md ${isFavorite
@@ -308,7 +305,7 @@ const BookCard: React.FC<BookCardProps> = ({
                                 >
                                     <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
                                 </button>
-                            )}
+                            )} */}
 
                             {/* Shelf indicator */}
                             {book.etagere && (

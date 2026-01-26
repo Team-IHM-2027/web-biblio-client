@@ -38,6 +38,7 @@ const BookDetailsPage: React.FC = () => {
     const [isReserving, setIsReserving] = useState(false);
     const [isCommentModalOpen, setIsCommentModalOpen] = useState(false);
     const [loadingComments, setLoadingComments] = useState(false);
+    const [isReserved, setIsReserved] = useState(false);
 
     const primaryColor = orgSettings?.Theme?.Primary || '#ff8c00';
     const secondaryColor = orgSettings?.Theme?.Secondary || '#1b263b';
@@ -50,6 +51,17 @@ const BookDetailsPage: React.FC = () => {
                 if (user) {
                     setCurrentUser(user);
                     setIsAuthenticated(true);
+
+                    // Check if book is reserved
+                    if (id) {
+                        const reserved =
+                            user.tabEtat1?.[0] === id ||
+                            user.tabEtat2?.[0] === id ||
+                            user.tabEtat3?.[0] === id ||
+                            user.tabEtat4?.[0] === id ||
+                            user.tabEtat5?.[0] === id;
+                        setIsReserved(reserved);
+                    }
                 }
             } catch (error) {
                 console.error('Erreur chargement utilisateur:', error);
@@ -64,13 +76,13 @@ const BookDetailsPage: React.FC = () => {
         try {
             return {
                 userName: nomUser || 'Utilisateur anonyme',
-                userAvatar: getRandomDefaultAvatar(nomUser)
+                userAvatar: getRandomDefaultAvatar()
             };
         } catch (error) {
             console.error('Erreur récupération données utilisateur:', error);
             return {
                 userName: nomUser || 'Utilisateur anonyme',
-                userAvatar: getRandomDefaultAvatar(nomUser)
+                userAvatar: getRandomDefaultAvatar()
             };
         }
     };
@@ -164,7 +176,12 @@ const BookDetailsPage: React.FC = () => {
     }, [isAuthenticated, currentUser, book]); // Se déclenche une fois que tout est chargé
     // Gestion de la réservation
     const handleReserve = async () => {
-        if (!isAuthenticated) {
+        if (isReserved) {
+            navigate("/dashboard/consultations");
+            return;
+        }
+
+        if (!isAuthenticated || !currentUser) {
             navigate('/auth', { state: { from: location } });
             return;
         }
@@ -173,23 +190,41 @@ const BookDetailsPage: React.FC = () => {
             return;
         }
 
+        const confirmed = window.confirm(
+            'Voulez-vous vraiment réserver ce livre ?\n\n' +
+            'Un bibliothécaire devra valider votre réservation.'
+        );
+
+        if (!confirmed) return;
+
         setIsReserving(true);
 
         try {
-            // Mettre à jour le nombre d'exemplaires dans Firestore
-            const bookRef = doc(db, 'BiblioBooks', book.id);
-            await updateDoc(bookRef, {
-                exemplaire: book.exemplaire - 1
-            });
+            const { reservationService } = await import('../services/reservationService');
+            const result = await reservationService.reserveBook(book.id, currentUser);
 
-            // Mettre à jour l'état local
-            setBook(prev => prev ? {
-                ...prev,
-                exemplaire: prev.exemplaire - 1
-            } : null);
+            if (result.success) {
+                alert('✅ ' + result.message);
 
-            // TODO: Ajouter la réservation à l'utilisateur
+                // Mettre à jour l'état local du livre
+                setBook(prev => prev ? {
+                    ...prev,
+                    exemplaire: prev.exemplaire - 1
+                } : null);
 
+                // Recharger les données utilisateur pour mettre à jour le panier/isReserved
+                try {
+                    const updatedUser = await authService.getCurrentUser();
+                    if (updatedUser) {
+                        setCurrentUser(updatedUser);
+                        setIsReserved(true);
+                    }
+                } catch (err) {
+                    console.error('Erreur rafraîchissement utilisateur:', err);
+                }
+            } else {
+                alert('❌ ' + result.message);
+            }
         } catch (error) {
             console.error('❌ Erreur réservation:', error);
             alert('Erreur lors de la réservation. Veuillez réessayer.');
@@ -250,7 +285,7 @@ const BookDetailsPage: React.FC = () => {
                 id: `comment_new_${Date.now()}`,
                 userId: currentUser.id || '',
                 userName: currentUser.name,
-                userAvatar: currentUser.profilePicture || currentUser.imageUri || getRandomDefaultAvatar(currentUser.id),
+                userAvatar: currentUser.profilePicture || currentUser.imageUri || getRandomDefaultAvatar(),
                 helpful: 0
             };
 
@@ -388,6 +423,7 @@ const BookDetailsPage: React.FC = () => {
                         onToggleFavorite={handleToggleFavorite}
                         onOpenCommentModal={() => setIsCommentModalOpen(true)}
                         isFavorite={isFavorite}
+                        isReserved={isReserved}
                         isAuthenticated={isAuthenticated}
                         isReserving={isReserving}
                         commentsWithUserData={commentsWithUserData}

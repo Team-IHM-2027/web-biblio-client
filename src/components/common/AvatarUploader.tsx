@@ -1,7 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { useConfig } from '../../contexts/ConfigContext';
 import { cloudinaryService, UploadProgress } from '../../services/cloudinaryService';
-import { Camera, Upload, X, User, CheckCircle, AlertCircle } from 'lucide-react';
+import { Camera, Upload, X, CheckCircle, AlertCircle } from 'lucide-react';
+import { getRandomDefaultAvatar } from '../../utils/userUtils';
 
 interface AvatarUploaderProps {
     currentAvatar?: string;
@@ -15,15 +16,15 @@ interface AvatarUploaderProps {
 }
 
 const AvatarUploader: React.FC<AvatarUploaderProps> = ({
-                                                           currentAvatar,
-                                                           onAvatarUploaded,
-                                                           onAvatarRemoved,
-                                                           size = 'lg',
-                                                           userName = '',
-                                                           userId,
-                                                           disabled = false,
-                                                           className = ''
-                                                       }) => {
+    currentAvatar,
+    onAvatarUploaded,
+    onAvatarRemoved,
+    size = 'lg',
+    userName = '',
+    userId,
+    disabled = false,
+    className = ''
+}) => {
     const { orgSettings } = useConfig();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -203,15 +204,6 @@ const AvatarUploader: React.FC<AvatarUploaderProps> = ({
         }
     };
 
-    // Générer les initiales du nom
-    const getInitials = (name: string): string => {
-        return name
-            .split(' ')
-            .map(n => n.charAt(0))
-            .join('')
-            .toUpperCase()
-            .slice(0, 2);
-    };
 
     return (
         <div className={`flex flex-col items-center space-y-4 ${className}`}>
@@ -227,13 +219,12 @@ const AvatarUploader: React.FC<AvatarUploaderProps> = ({
             {/* Container de l'avatar avec drag & drop */}
             <div className="relative group">
                 <div
-                    className={`${sizeConfig.container} rounded-full overflow-hidden border-4 cursor-pointer transition-all duration-300 relative ${
-                        disabled
-                            ? 'opacity-50 cursor-not-allowed border-gray-300'
-                            : isDragging
-                                ? 'scale-105 shadow-2xl'
-                                : 'hover:scale-105 hover:shadow-xl'
-                    } ${isDragging ? 'border-dashed' : 'border-solid'}`}
+                    className={`${sizeConfig.container} rounded-full overflow-hidden border-4 cursor-pointer transition-all duration-300 relative ${disabled
+                        ? 'opacity-50 cursor-not-allowed border-gray-300'
+                        : isDragging
+                            ? 'scale-105 shadow-2xl'
+                            : 'hover:scale-105 hover:shadow-xl'
+                        } ${isDragging ? 'border-dashed' : 'border-solid'}`}
                     style={{
                         borderColor: disabled
                             ? '#d1d5db'
@@ -256,34 +247,11 @@ const AvatarUploader: React.FC<AvatarUploaderProps> = ({
                             className="w-full h-full object-cover"
                         />
                     ) : (
-                        <div
-                            className={`w-full h-full flex items-center justify-center transition-colors ${
-                                isDragging ? 'bg-blue-50' : 'bg-gray-50'
-                            }`}
-                            style={{
-                                backgroundColor: isDragging
-                                    ? `${primaryColor}10`
-                                    : `${primaryColor}05`
-                            }}
-                        >
-                            {userName ? (
-                                <span
-                                    className={`font-bold ${sizeConfig.text} transition-colors`}
-                                    style={{
-                                        color: isDragging ? primaryColor : '#9ca3af'
-                                    }}
-                                >
-                                    {getInitials(userName)}
-                                </span>
-                            ) : (
-                                <User
-                                    size={sizeConfig.icon}
-                                    style={{
-                                        color: isDragging ? primaryColor : '#9ca3af'
-                                    }}
-                                />
-                            )}
-                        </div>
+                        <img
+                            src={getRandomDefaultAvatar()}
+                            alt={userName || 'Avatar'}
+                            className="w-full h-full object-cover opacity-50"
+                        />
                     )}
 
                     {/* Overlay avec icône au survol */}

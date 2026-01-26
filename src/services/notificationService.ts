@@ -415,32 +415,56 @@ class NotificationService {
         callback: (notifications: Notification[]) => void
     ): () => void {
         try {
-            const q = query(
-                collection(db, this.collectionName),
+            const notificationsRef = collection(db, this.collectionName);
+
+            const q1 = query(
+                notificationsRef,
                 where('userId', '==', userId),
-                orderBy('timestamp', 'desc'),
                 limit(50)
             );
 
-            const unsubscribe = onSnapshot(q, (snapshot) => {
-                const notifications = snapshot.docs.map(doc => {
-                    const data = doc.data();
-                    const notification = {
-                        id: doc.id,
-                        ...data
-                    } as Notification;
+            const q2 = query(
+                notificationsRef,
+                where('userEmail', '==', userId),
+                limit(50)
+            );
 
-                    // Handle different notification types with proper typing
-                    return this.normalizeNotification(notification);
-                });
+            let notifications1: Notification[] = [];
+            let notifications2: Notification[] = [];
 
-                callback(notifications);
+            const mergeAndCallback = () => {
+                const allNotifs = [...notifications1, ...notifications2];
+                const uniqueNotifs = new Map<string, Notification>();
+
+                allNotifs.forEach(n => uniqueNotifs.set(n.id, n));
+
+                const sorted = Array.from(uniqueNotifs.values()).sort((a, b) => {
+                    const dateA = a.timestamp?.seconds || (typeof a.timestamp === 'object' && a.timestamp && 'getTime' in a.timestamp ? (a.timestamp as any).getTime() / 1000 : 0);
+                    const dateB = b.timestamp?.seconds || (typeof b.timestamp === 'object' && b.timestamp && 'getTime' in b.timestamp ? (b.timestamp as any).getTime() / 1000 : 0);
+                    return dateB - dateA;
+                }).slice(0, 50);
+
+                callback(sorted);
+            };
+
+            const unsubscribe1 = onSnapshot(q1, (snapshot) => {
+                notifications1 = snapshot.docs.map(doc => this.normalizeNotification({ id: doc.id, ...doc.data() } as Notification));
+                mergeAndCallback();
             }, (error) => {
-                console.error('Error in user notifications subscription:', error);
-                callback([]);
+                console.error('Error in q1 subscription:', error);
             });
 
-            return unsubscribe;
+            const unsubscribe2 = onSnapshot(q2, (snapshot) => {
+                notifications2 = snapshot.docs.map(doc => this.normalizeNotification({ id: doc.id, ...doc.data() } as Notification));
+                mergeAndCallback();
+            }, (error) => {
+                console.error('Error in q2 subscription:', error);
+            });
+
+            return () => {
+                unsubscribe1();
+                unsubscribe2();
+            };
         } catch (error) {
             console.error('Error setting up user notifications subscription:', error);
             return () => { };
@@ -517,7 +541,7 @@ class NotificationService {
                         bookTitle: data.bookTitle || '',
                         dueDate: data.dueDate || new Date().toISOString(),
                         reminderDate: data.reminderDate || new Date().toISOString(),
-                        daysLeft: data.daysLeft || 3
+                        daysLeft: 3
                     }
                 } as ReminderNotification;
 
@@ -533,7 +557,6 @@ class NotificationService {
         try {
             const q = query(
                 collection(db, this.librarianNotificationCollection),
-                orderBy('timestamp', 'desc'),
                 limit(50)
             );
 
@@ -581,7 +604,6 @@ class NotificationService {
             return unsubscribe; // This is the unsubscribe function
         } catch (error) {
             console.error('Error setting up subscription:', error);
-            // Return a dummy unsubscribe function
             return () => { };
         }
     }
@@ -883,20 +905,47 @@ class NotificationService {
      */
     async getNotificationsForUser(userId: string, count: number = 50): Promise<Notification[]> {
         try {
-            const q = query(
-                collection(db, this.collectionName),
+            const notificationsRef = collection(db, this.collectionName);
+
+            // Query 1: where userId matches
+            const q1 = query(
+                notificationsRef,
                 where('userId', '==', userId),
-                orderBy('timestamp', 'desc'),
                 limit(count)
             );
-            const querySnapshot = await getDocs(q);
-            return querySnapshot.docs.map(doc => {
-                const data = doc.data();
-                return this.normalizeNotification({
-                    id: doc.id,
+
+            // Query 2: where userEmail matches (in case it was stored with email)
+            const q2 = query(
+                notificationsRef,
+                where('userEmail', '==', userId),
+                limit(count)
+            );
+
+            const [snap1, snap2] = await Promise.all([
+                getDocs(q1),
+                getDocs(q2)
+            ]);
+
+            const allDocs = [...snap1.docs, ...snap2.docs];
+
+            // Deduplicate by ID
+            const uniqueNotifs = new Map<string, Notification>();
+
+            allDocs.forEach(docSnap => {
+                const data = docSnap.data();
+                const notification = this.normalizeNotification({
+                    id: docSnap.id,
                     ...data
                 } as Notification);
+                uniqueNotifs.set(notification.id, notification);
             });
+
+            return Array.from(uniqueNotifs.values()).sort((a, b) => {
+                const dateA = a.timestamp?.seconds || (typeof a.timestamp === 'object' && a.timestamp && 'getTime' in a.timestamp ? (a.timestamp as any).getTime() / 1000 : 0);
+                const dateB = b.timestamp?.seconds || (typeof b.timestamp === 'object' && b.timestamp && 'getTime' in b.timestamp ? (b.timestamp as any).getTime() / 1000 : 0);
+                return dateB - dateA;
+            }).slice(0, count);
+
         } catch (error) {
             console.error("❌ Erreur lors de la récupération des notifications:", error);
             return [];
@@ -906,10 +955,14 @@ class NotificationService {
     /**
      * Récupère les notifications depuis le document utilisateur
      */
-    async getNotificationsFromUserDoc(userId: string): Promise<Notification[]> {
+    async getNotificationsFromUserDoc(userIdOrEmail: string): Promise<Notification[]> {
         try {
-            const userRef = doc(db, 'BiblioUser', userId);
-            const userSnap = await getDoc(userRef);
+            // Try as document ID (could be email or UID)
+            let userRef = doc(db, 'BiblioUser', userIdOrEmail);
+            let userSnap = await getDoc(userRef);
+
+            // If not found and it looks like a UID might have an email, we could try the other way
+            // but usually we pass what we have. If we want to be sure, we need the user object.
 
             if (userSnap.exists()) {
                 const userData = userSnap.data();
@@ -918,10 +971,9 @@ class NotificationService {
                 return notifications.map((notification: any) => {
                     return {
                         ...notification,
-                        // Ensure proper typing based on the notification type
                         type: notification.type,
                         read: notification.read || false,
-                        timestamp: notification.date || Timestamp.now()
+                        timestamp: notification.date || notification.timestamp || Timestamp.now()
                     } as Notification;
                 });
             }
@@ -1145,18 +1197,26 @@ class NotificationService {
             console.error("❌ Erreur lors de la vérification des rappels:", error);
         }
     }
-    async getUnifiedNotifications(userId: string): Promise<Notification[]> {
+    async getUnifiedNotifications(userIdentifier: string): Promise<Notification[]> {
         try {
+            // Identifier can be email or UID
             const [collectionNotifs, docNotifs] = await Promise.all([
-                this.getNotificationsForUser(userId, 100),
-                this.getNotificationsFromUserDoc(userId)
+                this.getNotificationsForUser(userIdentifier, 100),
+                this.getNotificationsFromUserDoc(userIdentifier)
             ]);
+
             const allNotifs = [...collectionNotifs, ...docNotifs];
             const uniqueNotifs = Array.from(new Map(allNotifs.map(item => [item.id, item])).values());
+
             return uniqueNotifs.sort((a, b) => {
-                const dateA = a.timestamp?.seconds || (typeof a.timestamp === 'object' && a.timestamp && 'getTime' in a.timestamp ? (a.timestamp as any).getTime() / 1000 : 0);
-                const dateB = b.timestamp?.seconds || (typeof b.timestamp === 'object' && b.timestamp && 'getTime' in b.timestamp ? (b.timestamp as any).getTime() / 1000 : 0);
-                return dateB - dateA;
+                const getTime = (ts: any) => {
+                    if (!ts) return 0;
+                    if (ts?.seconds) return ts.seconds * 1000 + (ts.nanoseconds || 0) / 1000000;
+                    if (ts instanceof Date) return ts.getTime();
+                    if (typeof ts === 'string') return new Date(ts).getTime();
+                    return 0;
+                };
+                return getTime(b.timestamp) - getTime(a.timestamp);
             });
         } catch (error) {
             console.error("❌ Erreur unified notifications:", error);

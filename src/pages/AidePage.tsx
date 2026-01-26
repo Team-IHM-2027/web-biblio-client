@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
-import { MessageCircle, FileText, LifeBuoy } from 'lucide-react';
-
+import { LifeBuoy } from 'lucide-react';
+import { Link } from 'react-router-dom';
 // ==============================================================================
 // 🚨 MOCKS D'INTÉGRATION 🚨
 // Ces définitions mockent les imports externes pour permettre la compilation
@@ -50,6 +50,7 @@ const AidePage: React.FC = () => {
     // Récupération des couleurs de la configuration globale via le mock
     const { orgSettings } = useConfig();
     const primaryColor = orgSettings?.Theme?.Primary || '#ff8c00';
+    // @ts-ignore
     const secondaryColor = orgSettings?.Theme?.Secondary || '#1b263b';
 
     return (
@@ -88,27 +89,13 @@ const AidePage: React.FC = () => {
                                 et vous guider vers les ressources les plus pertinentes pour vos travaux.
                             </p>
                             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                                {/* Bouton Contacter un conseiller */}
-                                <button
-                                    className="inline-flex items-center px-8 py-3 rounded-lg text-white font-medium transition-all duration-200 hover:shadow-xl transform hover:scale-[1.02]"
+                                <Link
+                                    to="/dashboard/messages"
+                                    className="px-6 py-3 rounded-xl text-white font-medium transition-all duration-300 hover:shadow-lg transform hover:scale-105"
                                     style={{ backgroundColor: primaryColor }}
-                                    onClick={() => console.log('Action: Contacter conseiller')}
                                 >
-                                    <MessageCircle className="w-5 h-5 mr-2" />
-                                    Contacter un conseiller académique
-                                </button>
-                                {/* Bouton Guide de rédaction */}
-                                <button
-                                    className="inline-flex items-center px-8 py-3 rounded-lg font-medium border-2 transition-all duration-200 hover:shadow-xl transform hover:scale-[1.02]"
-                                    style={{
-                                        borderColor: secondaryColor,
-                                        color: secondaryColor
-                                    }}
-                                    onClick={() => console.log('Action: Ouvrir guide de rédaction')}
-                                >
-                                    <FileText className="w-5 h-5 mr-2" />
-                                    Guide de rédaction
-                                </button>
+                                    Contacter un bibliothécaire
+                                </Link>
                             </div>
                         </div>
                     </div>
