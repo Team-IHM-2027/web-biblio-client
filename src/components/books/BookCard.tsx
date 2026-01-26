@@ -117,7 +117,7 @@ const BookCard: React.FC<BookCardProps> = ({
         }
     };
 
-    const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    const handleImageError = (_e: React.SyntheticEvent<HTMLImageElement, Event>) => {
         setImageError(true);
         e.currentTarget.src = '/default-cover.jpeg';
     };
