@@ -10,7 +10,8 @@ import BooksSortOptions, { SortOption, ViewMode } from '../components/books/Book
 import BooksList from '../components/books/BooksList';
 import Header from "../components/layout/Header.tsx";
 import Footer from "../components/layout/Footer.tsx";
-import {MessageCircle} from "lucide-react";
+//import { MessageCircle } from "lucide-react";
+import { Link } from 'react-router-dom';
 import LibraryStatistics from "../components/books/LibraryStatistics.tsx";
 
 interface SearchFilters {
@@ -62,7 +63,7 @@ const BooksPage: React.FC = () => {
         setViewMode(mode);
     }, []);
 
-    
+
     // Gestion des favoris
     const handleToggleFavorite = useCallback((bookId: string) => {
         setFavoriteBooks(prev => {
@@ -88,14 +89,14 @@ const BooksPage: React.FC = () => {
                             } else {
                                 alert(`❌ ${notification.title}\n${notification.message}`);
                             }
-                            
+
                             // Marquer comme lue
                             notificationService.markAsRead(notification.id);
                         }
                     });
                 }
             );
-            
+
             return () => unsubscribe();
         }
     }, [currentUser]);
@@ -113,7 +114,7 @@ const BooksPage: React.FC = () => {
             //@ts-ignore
             const userName = currentUser.name || currentUser.username || 'Utilisateur';
             const userEmail = currentUser.email;
-            
+
             if (!userEmail) {
                 alert('Votre profil ne contient pas d\'email. Veuillez mettre à jour votre profil.');
                 return;
@@ -123,14 +124,14 @@ const BooksPage: React.FC = () => {
                 'Voulez-vous vraiment réserver ce livre ?\n\n' +
                 'Un bibliothécaire devra valider votre réservation.'
             );
-            
+
             if (!confirmed) return;
 
             const result = await reservationService.reserveBook(bookId, currentUser);
-            
+
             if (result.success) {
                 alert('✅ ' + result.message);
-                
+
                 // Refresh the page or update UI if needed
                 // You might want to trigger a refresh of the book list here
             } else {
@@ -271,25 +272,13 @@ const BooksPage: React.FC = () => {
                             et vous aider à trouver les ressources les plus adaptées à vos besoins.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                            <button
-                                className="inline-flex cursor-pointer items-center px-8 py-3 rounded-lg text-white font-medium transition-all duration-200 hover:shadow-lg transform hover:scale-[1.02]"
+                            <Link
+                                to="/dashboard/messages"
+                                className="px-6 py-3 rounded-xl text-white font-medium transition-all duration-300 hover:shadow-lg transform hover:scale-105"
                                 style={{ backgroundColor: primaryColor }}
                             >
-                                <MessageCircle className='w-5 h-5 mx-2'/>
                                 Contacter un bibliothécaire
-                            </button>
-                            <button
-                                className="inline-flex cursor-pointer items-center px-8 py-3 rounded-lg font-medium border-2 transition-all duration-200 hover:shadow-lg transform hover:scale-[1.02]"
-                                style={{
-                                    borderColor: secondaryColor,
-                                    color: secondaryColor
-                                }}
-                            >
-                                <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                Guide d'utilisation
-                            </button>
+                            </Link>
                         </div>
                     </div>
                 </div>

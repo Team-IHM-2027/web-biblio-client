@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { useConfig } from '../contexts/ConfigContext';
-
+import { Link } from 'react-router-dom';
 import DepartmentFilter from '../components/common/DepartmentFilter.tsx';
 import ThesisAdvancedSearchBar from '../components/thesis/ThesisAdvancedSearchBar';
 import ThesisSortOptions, { ThesisSortOption, ViewMode } from '../components/thesis/ThesisSortOptions';
@@ -8,7 +8,7 @@ import ThesisList from '../components/thesis/ThesisList';
 import ThesisStatistics from '../components/thesis/ThesisStatistics';
 import Header from '../components/layout/Header';
 import Footer from '../components/layout/Footer';
-import { MessageCircle, FileText, Award, TrendingUp } from 'lucide-react';
+import { FileText, Award, TrendingUp } from 'lucide-react';
 import { ThesisSearchFilters } from '../types/thesis';
 
 const ThesisPage: React.FC = () => {
@@ -218,23 +218,13 @@ const ThesisPage: React.FC = () => {
                             et vous guider vers les ressources les plus pertinentes pour vos travaux.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                            <button
-                                className="inline-flex items-center px-8 py-3 rounded-lg text-white font-medium transition-all duration-200 hover:shadow-lg transform hover:scale-[1.02]"
+                            <Link
+                                to="/dashboard/messages"
+                                className="px-6 py-3 rounded-xl text-white font-medium transition-all duration-300 hover:shadow-lg transform hover:scale-105"
                                 style={{ backgroundColor: primaryColor }}
                             >
-                                <MessageCircle className="w-5 h-5 mr-2" />
-                                Contacter un conseiller académique
-                            </button>
-                            <button
-                                className="inline-flex items-center px-8 py-3 rounded-lg font-medium border-2 transition-all duration-200 hover:shadow-lg transform hover:scale-[1.02]"
-                                style={{
-                                    borderColor: secondaryColor,
-                                    color: secondaryColor
-                                }}
-                            >
-                                <FileText className="w-5 h-5 mr-2" />
-                                Guide de rédaction
-                            </button>
+                                Contacter un bibliothécaire
+                            </Link>
                         </div>
                     </div>
                 </div>

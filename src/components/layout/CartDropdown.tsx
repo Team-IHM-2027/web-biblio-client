@@ -5,7 +5,7 @@ import { ShoppingCart, AlertCircle } from 'lucide-react';
 import { BiblioUser, TabEtatEntry } from '../../types/auth';
 import { authService } from '../../services/auth/authService';
 import { useConfig } from '../../contexts/ConfigContext';
-import {cancelReservation} from "../../services/cancelReservation.ts";
+import { cancelReservation } from "../../services/cancelReservation.ts";
 
 interface CartDropdownProps {
     currentUser: BiblioUser | null;
@@ -63,8 +63,8 @@ const CartDropdown: React.FC<CartDropdownProps> = ({ currentUser, setCurrentUser
                 <ShoppingCart className="h-6 w-6" />
                 {tabEtatEntries.length > 0 && (
                     <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-            {tabEtatEntries.length}
-          </span>
+                        {tabEtatEntries.length}
+                    </span>
                 )}
             </button>
 
@@ -83,7 +83,7 @@ const CartDropdown: React.FC<CartDropdownProps> = ({ currentUser, setCurrentUser
                     ) : (
                         <div className="max-h-96 overflow-y-auto">
                             {tabEtatEntries.map((entry, index) => {
-                                const [idDoc, nameDoc, cathegorie, image] = entry;
+                                const [_idDoc, nameDoc, cathegorie, image] = entry;
 
                                 return (
                                     <div key={index} className="px-4 py-3 border-b border-gray-100">
@@ -97,13 +97,13 @@ const CartDropdown: React.FC<CartDropdownProps> = ({ currentUser, setCurrentUser
                                                 <h4 className="text-sm font-medium text-gray-900 line-clamp-2">{nameDoc}</h4>
                                                 <p className="text-xs text-gray-500">{cathegorie}</p>
                                                 <div className="mt-2 flex items-center">
-                                                    <button
+                                                    {/* <button
                                                         onClick={() => navigate(`/books/${idDoc}`)}
                                                         className="text-xs cursor-pointer hover:text-blue-800 mr-3"
                                                         style={{ color: primaryColor }}
                                                     >
                                                         Voir détails
-                                                    </button>
+                                                    </button> */}
                                                     <button
                                                         onClick={() => handleCancel(entry)}
                                                         className="text-xs cursor-pointer text-red-600 hover:text-red-800"
@@ -122,12 +122,10 @@ const CartDropdown: React.FC<CartDropdownProps> = ({ currentUser, setCurrentUser
                     {tabEtatEntries.length > 0 && (
                         <div className="px-4 py-3 border-t border-gray-200">
                             <button
-                               onClick={() => {
-    navigate("/dashboard/emprunts", {
-        state: { reservations: tabEtatEntries }
-    });
-    setShowCartDropdown(false);
-}}
+                                onClick={() => {
+                                    navigate("/dashboard/consultations");
+                                    setShowCartDropdown(false);
+                                }}
 
                                 className="block w-full text-center cursor-pointer text-white py-2 rounded-lg hover:bg-blue-700 transition-colors"
                                 style={{ backgroundColor: primaryColor }}

@@ -12,19 +12,21 @@ import {
   ChevronRight,
   BookOpen,
   Menu,
-
+  Bell
 } from 'lucide-react';
 import { authService } from '../services/auth/authService';
+import { notificationService } from '../services/notificationService';
 import { BiblioUser } from '../types/auth';
 import { useConfig } from '../contexts/ConfigContext';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import { getRandomDefaultAvatar } from '../utils/userUtils';
 
 // Interface pour les menus
 interface MenuItem {
   path: string;
   name: string;
   icon: JSX.Element;
-  badge?: number;
+  hasUnread?: boolean;
 }
 
 const DashboardLayout = () => {
@@ -32,6 +34,7 @@ const DashboardLayout = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [user, setUser] = useState<BiblioUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
   const location = useLocation();
   const { orgSettings } = useConfig();
 
@@ -72,6 +75,20 @@ const DashboardLayout = () => {
     fetchUser();
   }, []);
 
+  // Écouter les notifications en temps réel
+  useEffect(() => {
+    if (user?.email) {
+      const unsubscribe = notificationService.subscribeToUserNotifications(
+        user.email,
+        (notifications) => {
+          const unread = notifications.filter(n => !n.read).length;
+          setUnreadNotificationsCount(unread);
+        }
+      );
+      return () => unsubscribe();
+    }
+  }, [user?.email]);
+
   // Détection du mode mobile
   useEffect(() => {
     const handleResize = () => {
@@ -99,8 +116,7 @@ const DashboardLayout = () => {
     {
       path: '/dashboard/emprunts',
       name: 'Mes Emprunts',
-      icon: <Calendar size={20} />,
-      badge: 0
+      icon: <Calendar size={20} />
     },
     {
       path: '/dashboard/messages',
@@ -113,12 +129,12 @@ const DashboardLayout = () => {
       name: 'Consultations',
       icon: <Clock size={20} />
     },
-    // {
-    //   path: '/dashboard/notifications',
-    //   name: 'Notifications',
-    //   icon: <Bell size={20} />,
-    //   badge: 0
-    // }
+    {
+      path: '/dashboard/notifications',
+      name: 'Notifications',
+      icon: <Bell size={20} />,
+      hasUnread: unreadNotificationsCount > 0
+    }
   ];
 
   if (loading) {
@@ -192,7 +208,7 @@ const DashboardLayout = () => {
             <div className="relative">
               <div className="w-12 h-12 rounded-full overflow-hidden ring-2 ring-white/20 shadow-lg">
                 <img
-                  src={user?.profilePicture || `https://ui-avatars.com/api/?name=${user?.name?.replace(' ', '+') || 'User'}&background=${primaryColor.replace('#', '')}&color=ffffff&size=200&font-size=0.4`}
+                  src={user?.profilePicture || user?.imageUri || getRandomDefaultAvatar()}
                   alt="Profile"
                   className="w-full h-full object-cover"
                 />
@@ -261,27 +277,20 @@ const DashboardLayout = () => {
                     {!collapsed && (
                       <div className="relative ml-3 flex-1 z-10">
                         <span className="whitespace-nowrap">{item.name}</span>
-                        {/* Affiche le badge uniquement si > 0 */}
-                        {item.badge !== undefined && item.badge > 0 && (
+                        {item.hasUnread && (
                           <span
-                            className="absolute -top-2 -right-2 w-5 h-5 text-xs font-bold rounded-full
-                                     flex items-center justify-center text-white"
+                            className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full"
                             style={{ backgroundColor: '#ef4444' }}
-                          >
-                            {item.badge > 9 ? '9+' : item.badge}
-                          </span>
+                          />
                         )}
                       </div>
                     )}
 
-                    {collapsed && item.badge !== undefined && item.badge > 0 && (
+                    {collapsed && item.hasUnread && (
                       <span
-                        className="absolute -top-1 -right-1 w-4 h-4 text-xs font-bold rounded-full
-                                 flex items-center justify-center text-white"
+                        className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full"
                         style={{ backgroundColor: '#ef4444' }}
-                      >
-                        {item.badge > 9 ? '9+' : item.badge}
-                      </span>
+                      />
                     )}
                   </NavLink>
                 </li>

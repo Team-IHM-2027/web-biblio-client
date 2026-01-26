@@ -1,5 +1,6 @@
-// src/components/common/NotificationIcon.tsx
 import React, { useEffect, useState, useRef } from 'react';
+import { useConfig } from '../../contexts/ConfigContext';
+
 import { Bell, X } from 'lucide-react';
 import { BiblioUser } from '../../types/auth';
 import { Link } from 'react-router-dom';
@@ -24,6 +25,9 @@ export interface NotificationItem {
 }
 
 const NotificationIcon: React.FC<Props> = ({ currentUser, maxVisible = 6 }) => {
+  const { orgSettings } = useConfig();
+  const primaryColor = orgSettings?.Theme?.Primary || '#ff8c00';
+
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [open, setOpen] = useState<boolean>(false);
@@ -342,14 +346,15 @@ const NotificationIcon: React.FC<Props> = ({ currentUser, maxVisible = 6 }) => {
               </ul>
             )}
 
-            {!loading && notifications.length > maxVisible && (
-              <div className="p-3 text-center border-t border-gray-100 bg-gray-50">
+            {!loading && notifications.length > 0 && (
+              <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-center">
                 <Link
                   to="/dashboard/notifications"
-                  className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                  className="w-full text-center py-2 px-4 text-white rounded-lg transition-all duration-200 text-sm font-medium shadow-sm hover:shadow-md"
+                  style={{ backgroundColor: primaryColor }}
                   onClick={() => setOpen(false)}
                 >
-                  Voir toutes les notifications ({notifications.length})
+                  Voir toutes mes notifications ({notifications.length})
                 </Link>
               </div>
             )}

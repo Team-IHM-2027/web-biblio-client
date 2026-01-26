@@ -1,5 +1,5 @@
-// src/components/book/BookHeader.tsx - Mis à jour avec la nouvelle interface
 import React, { useState } from 'react';
+
 import { useConfig } from '../../contexts/ConfigContext';
 import { BiblioBook, CommentWithUserData } from './BookCard';
 import {
@@ -13,7 +13,8 @@ import {
     Package,
     Calendar,
     User,
-    MessageSquare} from 'lucide-react';
+    MessageSquare
+} from 'lucide-react';
 
 interface BookHeaderProps {
     book: BiblioBook;
@@ -21,6 +22,7 @@ interface BookHeaderProps {
     onToggleFavorite: () => void;
     onOpenCommentModal: () => void;
     isFavorite: boolean;
+    isReserved?: boolean;
     isAuthenticated: boolean;
     isReserving: boolean;
     commentsWithUserData?: CommentWithUserData[];
@@ -32,6 +34,7 @@ const BookHeader: React.FC<BookHeaderProps> = ({
     onToggleFavorite,
     onOpenCommentModal,
     isFavorite,
+    isReserved = false,
     isAuthenticated,
     isReserving,
     commentsWithUserData = []
@@ -98,8 +101,8 @@ const BookHeader: React.FC<BookHeaderProps> = ({
                         {/* Badge de disponibilité flottant */}
                         <div className="absolute top-4 left-4 z-10">
                             <div className={`px-3 py-2 rounded-full text-sm font-semibold flex items-center shadow-lg backdrop-blur-sm ${isAvailable
-                                    ? 'bg-green-100/90 text-green-700 border border-green-200'
-                                    : 'bg-red-100/90 text-red-700 border border-red-200'
+                                ? 'bg-green-100/90 text-green-700 border border-green-200'
+                                : 'bg-red-100/90 text-red-700 border border-red-200'
                                 }`}>
                                 {isAvailable ? (
                                     <>
@@ -140,8 +143,8 @@ const BookHeader: React.FC<BookHeaderProps> = ({
                                                 <Star
                                                     key={star}
                                                     className={`w-5 h-5 transition-colors duration-200 ${star <= Math.round(averageRating)
-                                                            ? 'fill-current text-yellow-400'
-                                                            : 'text-gray-300'
+                                                        ? 'fill-current text-yellow-400'
+                                                        : 'text-gray-300'
                                                         }`}
                                                 />
                                             ))}
@@ -181,8 +184,8 @@ const BookHeader: React.FC<BookHeaderProps> = ({
                                     onClick={onToggleFavorite}
                                     disabled={!isAuthenticated}
                                     className={`p-3 rounded-full transition-all duration-200 ${isFavorite
-                                            ? 'bg-red-100 text-red-600 hover:bg-red-200'
-                                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                        ? 'bg-red-100 text-red-600 hover:bg-red-200'
+                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                         } ${!isAuthenticated ? 'opacity-50 cursor-not-allowed' : ''}`}
                                     title={
                                         !isAuthenticated
@@ -313,19 +316,24 @@ const BookHeader: React.FC<BookHeaderProps> = ({
                             <div className="flex flex-col sm:flex-row gap-4">
                                 <button
                                     onClick={onReserve}
-                                    disabled={!isAvailable || isReserving || !isAuthenticated}
-                                    className={`flex-1 py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-200 flex items-center justify-center ${isAvailable && !isReserving && isAuthenticated
-                                            ? 'text-white shadow-lg hover:shadow-xl transform hover:scale-[1.02]'
-                                            : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                    disabled={!isReserved && (!isAvailable || isReserving || !isAuthenticated)}
+                                    className={`flex-1 py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-200 flex items-center justify-center ${(isAvailable || isReserved) && !isReserving && isAuthenticated
+                                        ? 'text-white shadow-lg hover:shadow-xl transform hover:scale-[1.02]'
+                                        : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                         }`}
                                     style={{
-                                        backgroundColor: isAvailable && !isReserving && isAuthenticated ? primaryColor : undefined
+                                        backgroundColor: (isAvailable || isReserved) && !isReserving && isAuthenticated ? primaryColor : undefined
                                     }}
                                 >
                                     {isReserving ? (
                                         <>
                                             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-3" />
                                             Réservation en cours...
+                                        </>
+                                    ) : isReserved ? (
+                                        <>
+                                            <ShoppingCart className="w-5 h-5 mr-3" />
+                                            Voir ma réservation
                                         </>
                                     ) : !isAuthenticated ? (
                                         <>

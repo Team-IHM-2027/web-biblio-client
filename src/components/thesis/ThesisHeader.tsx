@@ -23,6 +23,7 @@ interface ThesisHeaderProps {
     onToggleFavorite: () => void;
     onOpenCommentModal: () => void;
     isFavorite: boolean;
+    isReserved?: boolean;
     isAuthenticated: boolean;
     isViewing: boolean;
     commentsWithUserData?: ThesisCommentWithUserData[];
@@ -34,6 +35,7 @@ const ThesisHeader: React.FC<ThesisHeaderProps> = ({
     onToggleFavorite,
     onOpenCommentModal,
     isFavorite,
+    isReserved = false,
     isAuthenticated,
     isViewing,
     commentsWithUserData = []
@@ -137,8 +139,8 @@ const ThesisHeader: React.FC<ThesisHeaderProps> = ({
                                                 <Star
                                                     key={star}
                                                     className={`w-5 h-5 transition-colors duration-200 ${star <= Math.round(averageRating)
-                                                            ? 'fill-current text-yellow-400'
-                                                            : 'text-gray-300'
+                                                        ? 'fill-current text-yellow-400'
+                                                        : 'text-gray-300'
                                                         }`}
                                                 />
                                             ))}
@@ -178,8 +180,8 @@ const ThesisHeader: React.FC<ThesisHeaderProps> = ({
                                     onClick={onToggleFavorite}
                                     disabled={!isAuthenticated}
                                     className={`p-3 rounded-full cursor-pointer transition-all duration-200 ${isFavorite
-                                            ? 'bg-red-100 text-red-600 hover:bg-red-200'
-                                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                        ? 'bg-red-100 text-red-600 hover:bg-red-200'
+                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                         } ${!isAuthenticated ? 'opacity-50 cursor-not-allowed' : ''}`}
                                     title={
                                         !isAuthenticated
@@ -302,10 +304,10 @@ const ThesisHeader: React.FC<ThesisHeaderProps> = ({
                             <div className="flex flex-col sm:flex-row gap-4">
                                 <button
                                     onClick={onView}
-                                    disabled={isViewing || !isAuthenticated}
-                                    className={`flex-1 py-4 px-6 cursor-pointer rounded-xl font-semibold text-lg transition-all duration-200 flex items-center justify-center ${!isViewing && isAuthenticated
-                                            ? 'text-white shadow-lg hover:shadow-xl transform hover:scale-[1.02]'
-                                            : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                    disabled={(isViewing && !isReserved) || !isAuthenticated}
+                                    className={`flex-1 py-4 px-6 cursor-pointer rounded-xl font-semibold text-lg transition-all duration-200 flex items-center justify-center ${(!isViewing || isReserved) && isAuthenticated
+                                        ? 'text-white shadow-lg hover:shadow-xl transform hover:scale-[1.02]'
+                                        : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                         }`}
                                     style={{
                                         backgroundColor: !isViewing && isAuthenticated ? primaryColor : undefined
@@ -315,6 +317,11 @@ const ThesisHeader: React.FC<ThesisHeaderProps> = ({
                                         <>
                                             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-3" />
                                             Consultation en cours...
+                                        </>
+                                    ) : isReserved ? (
+                                        <>
+                                            <Eye className="w-5 h-5 mr-3" />
+                                            Voir ma réservation
                                         </>
                                     ) : !isAuthenticated ? (
                                         <>

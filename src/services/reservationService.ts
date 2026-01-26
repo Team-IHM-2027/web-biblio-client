@@ -254,6 +254,96 @@ export class ReservationService {
             return 0;
         }
     }
+
+    async reserveThesis(thesisId: string, currentUser: any): Promise<{ success: boolean; message: string; slotNumber?: number }> {
+        try {
+            if (!currentUser) {
+                throw new Error('Vous devez être connecté pour réserver un mémoire');
+            }
+
+            // Vérifier le mémoire
+            const thesisRef = doc(db, 'BiblioThesis', thesisId);
+            const thesisSnap = await getDoc(thesisRef);
+
+            if (!thesisSnap.exists()) {
+                throw new Error('Mémoire non trouvé');
+            }
+
+            const thesisData = thesisSnap.data();
+            const thesisTitle = thesisData.theme || thesisData.name || 'Mémoire sans titre';
+
+            // Trouver un slot disponible
+            const userRef = doc(db, this.userCollection, currentUser.email);
+            const userSnap = await getDoc(userRef);
+
+            let availableSlot = null;
+            if (userSnap.exists()) {
+                const userData = userSnap.data();
+                for (let i = 1; i <= 3; i++) {
+                    const stateKey = `etat${i}`;
+                    if (!userData[stateKey] || userData[stateKey] === 'ras' || userData[stateKey] === '') {
+                        availableSlot = i;
+                        break;
+                    }
+                }
+            }
+
+            if (!availableSlot) {
+                throw new Error('Vous avez atteint le nombre maximum de réservations (3 maximum)');
+            }
+
+            // Créer le tabEtat array
+            const tabData = [
+                thesisId,                                  // 0: id
+                thesisTitle,                               // 1: title
+                thesisData.département || 'General',       // 2: department
+                thesisData.image || '',                    // 3: image URL
+                'BiblioThesis',                            // 4: collection name
+                new Date().toISOString(),                  // 5: timestamp
+                1                                          // 6: count
+            ];
+
+            // Mise à jour simultanée
+            await updateDoc(userRef, {
+                [`etat${availableSlot}`]: 'reserv',
+                [`tabEtat${availableSlot}`]: tabData,
+                reservations: arrayUnion({
+                    bookId: thesisId,
+                    name: thesisTitle,
+                    cathegorie: thesisData.département || 'General',
+                    image: thesisData.image || '',
+                    nomBD: 'BiblioThesis',
+                    dateReservation: new Date(),
+                    etat: 'reserv',
+                    exemplaire: 1
+                })
+            });
+
+            // Pour les mémoires, on ne décrémente généralement pas les exemplaires
+            // mais on crée quand même la notification
+
+            await this.createReservationNotification(
+                currentUser.userId || currentUser.uid || currentUser.id,
+                currentUser.name || userSnap.data()?.name || 'Utilisateur',
+                currentUser.email,
+                thesisId,
+                thesisTitle
+            );
+
+            return {
+                success: true,
+                message: 'Mémoire réservé avec succès. En attente de validation du bibliothécaire.',
+                slotNumber: availableSlot
+            };
+
+        } catch (error: any) {
+            console.error('Thesis reservation error:', error);
+            return {
+                success: false,
+                message: error.message || 'Erreur lors de la réservation du mémoire'
+            };
+        }
+    }
 }
 
 export const reservationService = new ReservationService();

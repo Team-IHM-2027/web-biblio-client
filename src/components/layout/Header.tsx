@@ -92,7 +92,7 @@ const Header: React.FC = () => {
             >
                 <div className="relative">
                     <img
-                        src={currentUser?.profilePicture || currentUser?.imageUri || getRandomDefaultAvatar(currentUser?.id)}
+                        src={currentUser?.profilePicture || currentUser?.imageUri || getRandomDefaultAvatar()}
                         alt="Avatar"
                         className="w-8 h-8 rounded-full object-cover border-2"
                         style={{ borderColor: primaryColor }}
@@ -117,7 +117,7 @@ const Header: React.FC = () => {
                     <div className="px-4 py-3 border-b border-gray-100">
                         <div className="flex items-center space-x-3">
                             <img
-                                src={currentUser?.profilePicture || currentUser?.imageUri || getRandomDefaultAvatar(currentUser?.id)}
+                                src={currentUser?.profilePicture || currentUser?.imageUri || getRandomDefaultAvatar()}
                                 alt="Avatar"
                                 className="w-12 h-12 rounded-full object-cover"
                             />
@@ -191,14 +191,14 @@ const Header: React.FC = () => {
                                 </span>
                             )}
                         </NavLink>
-                        <NavLink
+                        {/* <NavLink
                             to="/dashboard/favorites"
                             className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
                             onClick={() => setShowUserMenu(false)}
                         >
                             <Heart className="w-4 h-4 mr-3" />
                             Favoris
-                        </NavLink>
+                        </NavLink> */}
                         {/* <NavLink
                             to="/dashboard/notifications"
                             className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
@@ -391,7 +391,7 @@ const Header: React.FC = () => {
                                 <div className="px-4 py-2 border-t border-gray-100 mt-2">
                                     <div className="flex items-center space-x-3 mb-4">
                                         <img
-                                            src={currentUser.profilePicture || currentUser.imageUri || getRandomDefaultAvatar(currentUser.id)}
+                                            src={currentUser.profilePicture || currentUser.imageUri || getRandomDefaultAvatar()}
                                             alt="Avatar"
                                             className="w-10 h-10 rounded-full object-cover"
                                         />

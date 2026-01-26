@@ -3,7 +3,7 @@ import { authService } from '../../services/auth/authService';
 import { BiblioUser, DEPARTMENTS } from '../../types/auth';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { useConfig } from '../../contexts/ConfigContext';
-import { Edit, Shield, Bell, UserCircle, ChevronRight, Check, X, Link as LinkIcon, Save } from 'lucide-react';
+import { Edit, Shield, UserCircle, ChevronRight, Check, X, Link as LinkIcon, Save } from 'lucide-react';
 import AvatarUploader from '../../components/common/AvatarUploader';
 import { getRandomDefaultAvatar } from '../../utils/userUtils';
 
@@ -324,7 +324,7 @@ const ProfilePage = () => {
                             {/* Avatar avec overlay au hover */}
                             <div className="relative group">
                                 <AvatarUploader
-                                    currentAvatar={user.profilePicture || user.imageUri || getRandomDefaultAvatar(user.id)}
+                                    currentAvatar={user.profilePicture || user.imageUri || getRandomDefaultAvatar()}
                                     onAvatarUploaded={handleAvatarUploaded}
                                     userId={user.id}
                                     userName={user.name}
@@ -400,7 +400,7 @@ const ProfilePage = () => {
                             isActive={activeTab === 'personal'}
                             onClick={() => setActiveTab('personal')}
                         />
-                        <TabButton
+                        {/* <TabButton
                             icon={<Shield size={20} />}
                             label="Sécurité"
                             isActive={activeTab === 'security'}
@@ -411,7 +411,7 @@ const ProfilePage = () => {
                             label="Notifications"
                             isActive={activeTab === 'notifications'}
                             onClick={() => setActiveTab('notifications')}
-                        />
+                        /> */}
                     </div>
                 </div>
 

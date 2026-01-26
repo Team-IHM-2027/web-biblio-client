@@ -38,6 +38,7 @@ const ThesisDetailsPage: React.FC = () => {
     const [isViewing, setIsViewing] = useState(false);
     const [isCommentModalOpen, setIsCommentModalOpen] = useState(false);
     const [loadingComments, setLoadingComments] = useState(false);
+    const [isReserved, setIsReserved] = useState(false);
 
     const primaryColor = orgSettings?.Theme?.Primary || '#ff8c00';
     const secondaryColor = orgSettings?.Theme?.Secondary || '#1b263b';
@@ -50,6 +51,17 @@ const ThesisDetailsPage: React.FC = () => {
                 if (user) {
                     setCurrentUser(user);
                     setIsAuthenticated(true);
+
+                    // Check if thesis is reserved
+                    if (id) {
+                        const reserved =
+                            user.tabEtat1?.[0] === id ||
+                            user.tabEtat2?.[0] === id ||
+                            user.tabEtat3?.[0] === id ||
+                            user.tabEtat4?.[0] === id ||
+                            user.tabEtat5?.[0] === id;
+                        setIsReserved(reserved);
+                    }
                 }
             } catch (error) {
                 console.error('Erreur chargement utilisateur:', error);
@@ -64,13 +76,13 @@ const ThesisDetailsPage: React.FC = () => {
         try {
             return {
                 userName: nomUser || 'Utilisateur anonyme',
-                userAvatar: getRandomDefaultAvatar(nomUser)
+                userAvatar: getRandomDefaultAvatar()
             };
         } catch (error) {
             console.error('Erreur récupération données utilisateur:', error);
             return {
                 userName: nomUser || 'Utilisateur anonyme',
-                userAvatar: getRandomDefaultAvatar(nomUser)
+                userAvatar: getRandomDefaultAvatar()
             };
         }
     };
@@ -165,7 +177,12 @@ const ThesisDetailsPage: React.FC = () => {
     }, [isAuthenticated, currentUser, thesis]);
     // Gestion de la consultation
     const handleView = async () => {
-        if (!isAuthenticated) {
+        if (isReserved) {
+            navigate("/dashboard/consultations");
+            return;
+        }
+
+        if (!isAuthenticated || !currentUser) {
             navigate('/auth', { state: { from: location } });
             return;
         }
@@ -174,20 +191,38 @@ const ThesisDetailsPage: React.FC = () => {
             return;
         }
 
+        const confirmed = window.confirm(
+            'Voulez-vous vraiment réserver ce mémoire ?\n\n' +
+            'Un bibliothécaire devra valider votre réservation.'
+        );
+
+        if (!confirmed) return;
+
         setIsViewing(true);
 
         try {
-            // TODO: Implémenter la logique de consultation
-            console.log('📖 Consultation du mémoire:', thesis.id);
+            const { reservationService } = await import('../services/reservationService');
+            const result = await reservationService.reserveThesis(thesis.id, currentUser);
 
-            // Simuler un délai
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            if (result.success) {
+                alert('✅ ' + result.message);
 
-            console.log('✅ Mémoire consulté avec succès');
-
+                // Recharger les données utilisateur pour mettre à jour le panier/isReserved
+                try {
+                    const updatedUser = await authService.getCurrentUser();
+                    if (updatedUser) {
+                        setCurrentUser(updatedUser);
+                        setIsReserved(true);
+                    }
+                } catch (err) {
+                    console.error('Erreur rafraîchissement utilisateur:', err);
+                }
+            } else {
+                alert('❌ ' + result.message);
+            }
         } catch (error) {
-            console.error('❌ Erreur consultation:', error);
-            alert('Erreur lors de la consultation. Veuillez réessayer.');
+            console.error('❌ Erreur réservation:', error);
+            alert('Erreur lors de la réservation. Veuillez réessayer.');
         } finally {
             setIsViewing(false);
         }
@@ -245,7 +280,7 @@ const ThesisDetailsPage: React.FC = () => {
                 id: `comment_new_${Date.now()}`,
                 userId: currentUser.id || '',
                 userName: currentUser.name,
-                userAvatar: currentUser.profilePicture || currentUser.imageUri || getRandomDefaultAvatar(currentUser.id),
+                userAvatar: currentUser.profilePicture || currentUser.imageUri || getRandomDefaultAvatar(),
                 helpful: 0
             };
 
@@ -382,6 +417,7 @@ const ThesisDetailsPage: React.FC = () => {
                         onToggleFavorite={handleToggleFavorite}
                         onOpenCommentModal={() => setIsCommentModalOpen(true)}
                         isFavorite={isFavorite}
+                        isReserved={isReserved}
                         isAuthenticated={isAuthenticated}
                         isViewing={isViewing}
                         commentsWithUserData={commentsWithUserData}
