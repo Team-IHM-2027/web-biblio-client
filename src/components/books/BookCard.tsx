@@ -165,7 +165,7 @@ const BookCard: React.FC<BookCardProps> = ({
         return Array.from({ length: max }, (_, i) => `etat${i + 1}`).includes(key);
     }
 
-    const handleReserve = async (e: React.MouseEvent) => {
+    const handleReserve = async (_e: React.MouseEvent) => {
         if (effectiveIsReserved) {
             navigate("/dashboard/consultations");
             return;
