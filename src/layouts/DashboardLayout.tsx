@@ -335,7 +335,7 @@ const DashboardLayout = () => {
       {isMobile && collapsed && (
         <button
           onClick={toggleSidebar}
-          className="fixed top-4 left-4 z-30 p-3 rounded-full bg-white shadow-xl
+          className="fixed top-4 right-4 z-30 p-3 rounded-full bg-white shadow-xl
                    hover:shadow-2xl transition-all duration-300 hover:scale-110"
           style={{ color: primaryColor }}
         >
