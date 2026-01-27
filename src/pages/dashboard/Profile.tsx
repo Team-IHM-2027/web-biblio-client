@@ -3,7 +3,8 @@ import { authService } from '../../services/auth/authService';
 import { BiblioUser, DEPARTMENTS } from '../../types/auth';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { useConfig } from '../../contexts/ConfigContext';
-import { Edit, Shield, UserCircle, ChevronRight, Check, X, Link as LinkIcon, Save } from 'lucide-react';
+import { Edit, Shield, UserCircle, ChevronRight, Check, X, Link as LinkIcon, Save, MessageCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import AvatarUploader from '../../components/common/AvatarUploader';
 import { getRandomDefaultAvatar } from '../../utils/userUtils';
 
@@ -22,6 +23,7 @@ const ProfilePage = () => {
     const [isEditingUrl, setIsEditingUrl] = useState(false);
     const [newProfileUrl, setNewProfileUrl] = useState('');
     const { orgSettings } = useConfig();
+    const navigate = useNavigate();
 
     const primaryColor = orgSettings?.Theme?.Primary || '#ff8c00';
     const secondaryColor = '#1b263b';
@@ -320,6 +322,27 @@ const ProfilePage = () => {
                     </div>
 
                     <div className="relative z-10 p-8 md:p-12">
+                        {/* Start Chat Banner for New Users */}
+                        {(!user.messages || user.messages.length === 0) && (
+                            <div className="mb-10 bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 flex flex-col md:flex-row items-center justify-between gap-6 animate-in fade-in slide-in-from-top-4 duration-700">
+                                <div className="flex items-center gap-4 text-center md:text-left">
+                                    <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center shrink-0 shadow-inner">
+                                        <MessageCircle className="text-white" size={28} />
+                                    </div>
+                                    <div>
+                                        <h4 className="text-white font-bold text-xl mb-1">Bienvenue sur votre bibliothèque !</h4>
+                                        <p className="text-white/80 text-sm max-w-md">Besoin d'aide ou d'informations sur vos emprunts ? Commencez une discussion avec notre bibliothécaire dès maintenant.</p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => navigate(`/dashboard/messages/${user.email}`)}
+                                    className="w-full md:w-auto px-8 py-4 bg-white text-blue-600 font-bold rounded-2xl hover:bg-blue-50 transition-all shadow-xl hover:shadow-2xl active:scale-95 whitespace-nowrap"
+                                >
+                                    Démarrer une discussion
+                                </button>
+                            </div>
+                        )}
+
                         <div className="flex flex-col lg:flex-row items-center gap-8">
                             {/* Avatar avec overlay au hover */}
                             <div className="relative group">

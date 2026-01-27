@@ -136,7 +136,7 @@ const UniversityHero = () => {
 
                         <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-4 mb-12">
                             <a
-                                href="/catalogue"
+                                href="/books"
                                 className="group bg-white text-gray-800 py-4 px-8 rounded-xl font-semibold transition-all duration-300 shadow-xl flex items-center justify-center transform hover:scale-105 hover:shadow-2xl"
                                 onMouseEnter={(e) => {
                                     e.currentTarget.style.backgroundColor = primaryColor;

@@ -31,7 +31,11 @@ const MessagesPage: React.FC = () => {
         const myConv = await getUserConversation(currentUser.email!);
         if (myConv) {
           myConv.messages = myConv.messages.filter(msg => msg.type !== 'bot');
-          setConversations([myConv]);
+          if (myConv.messages.length > 0) {
+            setConversations([myConv]);
+          } else {
+            setConversations([]);
+          }
         }
       } catch (error) {
         console.error('Error loading conversations:', error);
@@ -46,6 +50,10 @@ const MessagesPage: React.FC = () => {
       currentUser.email!,
       (allMessages) => {
         const messages = allMessages.filter(msg => msg.type !== 'bot');
+        if (messages.length === 0) {
+          setConversations([]);
+          return;
+        }
         const lastMsg = messages.length > 0 ? messages[messages.length - 1] : null;
         const updated: Conversation = {
           id: currentUser.email!,
@@ -128,6 +136,12 @@ const MessagesPage: React.FC = () => {
               </div>
               <p className="text-gray-500 font-medium">Aucune conversation</p>
               <p className="text-xs text-gray-400 mt-1">Commencez à discuter avec l'équipe de la bibliothèque.</p>
+              <button
+                onClick={() => navigate(`/dashboard/messages/${currentUser?.email}`)}
+                className="mt-6 px-6 py-2.5 bg-blue-500 text-white font-semibold rounded-xl hover:bg-blue-600 transition-all shadow-md active:scale-95"
+              >
+                Discuter maintenant
+              </button>
             </div>
           )}
         </div>

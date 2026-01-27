@@ -13,7 +13,9 @@ import BookDescription from '../components/books/BookDescription';
 import CommentsSection from '../components/common/CommentsSection';
 import CommentModal from '../components/common/CommentModal';
 import LoadingSpinner from '../components/common/LoadingSpinner';
-import { historyService } from '../services/historyService'; // Ajoutez cet import
+import { historyService } from '../services/historyService';
+import { recommendationService } from '../services/recommendationService';
+import RecommendedBooks from '../components/books/RecommendedBooks';
 
 // Import des interfaces depuis BookCard
 import { BiblioBook, Comment, CommentWithUserData } from '../components/books/BookCard';
@@ -39,6 +41,10 @@ const BookDetailsPage: React.FC = () => {
     const [isCommentModalOpen, setIsCommentModalOpen] = useState(false);
     const [loadingComments, setLoadingComments] = useState(false);
     const [isReserved, setIsReserved] = useState(false);
+
+    // États pour les recommandations
+    const [recommendedBooks, setRecommendedBooks] = useState<BiblioBook[]>([]);
+    const [loadingRecommendations, setLoadingRecommendations] = useState(false);
 
     const primaryColor = orgSettings?.Theme?.Primary || '#ff8c00';
     const secondaryColor = orgSettings?.Theme?.Secondary || '#1b263b';
@@ -174,6 +180,31 @@ const BookDetailsPage: React.FC = () => {
             });
         }
     }, [isAuthenticated, currentUser, book]); // Se déclenche une fois que tout est chargé
+
+    // Charger les recommandations
+    useEffect(() => {
+        const loadRecommendations = async () => {
+            if (id && book) {
+                setLoadingRecommendations(true);
+                try {
+                    const recommendations = await recommendationService.getRecommendedBooks(
+                        currentUser?.email || '', // Utilise l'email comme ID utilisateur pour les réservations
+                        id,
+                        5
+                    );
+                    setRecommendedBooks(recommendations);
+                } catch (err) {
+                    console.error('Erreur chargement recommandations:', err);
+                } finally {
+                    setLoadingRecommendations(false);
+                }
+            }
+        };
+
+        if (!loading) {
+            loadRecommendations();
+        }
+    }, [id, book, currentUser, loading]);
     // Gestion de la réservation
     const handleReserve = async () => {
         if (isReserved) {
@@ -431,6 +462,16 @@ const BookDetailsPage: React.FC = () => {
 
                     {/* Description du livre */}
                     <BookDescription book={book} />
+
+                    {/* Recommandations */}
+                    <RecommendedBooks
+                        books={recommendedBooks}
+                        loading={loadingRecommendations}
+                        onBookClick={(bookId) => {
+                            window.scrollTo(0, 0);
+                            navigate(`/books/${bookId}`);
+                        }}
+                    />
 
                     {/* Section des commentaires */}
                     <div className="relative">

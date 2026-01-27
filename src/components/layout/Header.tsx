@@ -381,7 +381,7 @@ const Header: React.FC = () => {
                                 Mémoires
                             </NavLink>
                             <NavLink
-                                to="/help"
+                                to="/helps"
                                 className="block px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
                                 onClick={() => setIsMenuOpen(false)}
                             >
@@ -397,7 +397,10 @@ const Header: React.FC = () => {
                                         />
                                         <div>
                                             <p className="font-medium text-gray-900">{currentUser.name}</p>
-                                            <p className="text-sm text-gray-500 capitalize">{currentUser.statut}</p>
+                                            <p className="text-sm text-gray-500">{currentUser.email}</p>
+                                            <p className="text-xs text-gray-400 capitalize">
+                                                {currentUser.statut} • {currentUser.departement}
+                                            </p>
                                         </div>
                                     </div>
                                     <div className="space-y-1">
@@ -441,14 +444,7 @@ const Header: React.FC = () => {
                                             )}
                                         </NavLink>
 
-                                        <NavLink
-                                            to="/dashboard/favorites"
-                                            className="flex items-center px-2 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
-                                            onClick={() => setIsMenuOpen(false)}
-                                        >
-                                            <Heart className="w-4 h-4 mr-3" />
-                                            Favoris
-                                        </NavLink>
+
 
                                         <button
                                             onClick={handleSignOut}
