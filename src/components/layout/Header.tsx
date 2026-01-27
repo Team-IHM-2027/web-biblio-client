@@ -5,7 +5,7 @@ import { auth } from '../../configs/firebase';
 import { useConfig } from '../../contexts/ConfigContext';
 import { authService } from '../../services/auth/authService';
 import { BiblioUser } from '../../types/auth';
-import { BookOpen, User, Menu, X, LogOut, MessageCircle, History, Heart } from 'lucide-react';
+import { BookOpen, User, Menu, X, LogOut, MessageCircle, History } from 'lucide-react';
 import CartDropdown from "./CartDropdown";
 import NotificationIcon from '../common/NotificationIcon';
 import { getRandomDefaultAvatar } from '../../utils/userUtils';
