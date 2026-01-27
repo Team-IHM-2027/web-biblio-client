@@ -120,13 +120,6 @@ const BooksPage: React.FC = () => {
                 return;
             }
 
-            const confirmed = window.confirm(
-                'Voulez-vous vraiment réserver ce livre ?\n\n' +
-                'Un bibliothécaire devra valider votre réservation.'
-            );
-
-            if (!confirmed) return;
-
             const result = await reservationService.reserveBook(bookId, currentUser);
 
             if (result.success) {

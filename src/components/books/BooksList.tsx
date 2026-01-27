@@ -41,6 +41,7 @@ const BooksList: React.FC<BooksListProps> = ({
     selectedDepartments,
     sortOption,
     viewMode,
+    onBookReserve,
     onToggleFavorite,
     favoriteBooks = [],
     className = ""
@@ -251,6 +252,7 @@ const BooksList: React.FC<BooksListProps> = ({
                         key={book.id}
                         book={book}
                         viewMode={viewMode}
+                        onReserve={onBookReserve}
                         onToggleFavorite={onToggleFavorite}
                         isFavorite={favoriteBooks.includes(book.id)}
                         userLoggedIn={!!currentUser}

@@ -171,22 +171,34 @@ const BookCard: React.FC<BookCardProps> = ({
             return;
         }
 
-        // Utiliser la prop onReserve si fournie
+        // Use the prop onReserve if provided
         if (onReserve) {
             if (!userLoggedIn) {
                 alert("Vous devez être connecté pour réserver un livre.");
                 return;
             }
 
+            const confirmed = window.confirm(
+                'Voulez-vous vraiment réserver ce livre ?\n\n' +
+                'Un bibliothécaire devra valider votre réservation.'
+            );
+            if (!confirmed) return;
+
             onReserve(book.id);
             return;
         }
 
-        // Ancienne logique de réservation (pour rétrocompatibilité)
+        // Old reservation logic (for backward compatibility)
         if (!currentUser || !isAvailable) {
             alert("Vous devez être connecté pour réserver un livre.");
             return;
         }
+
+        const confirmed = window.confirm(
+            'Voulez-vous vraiment réserver ce livre ?\n\n' +
+            'Un bibliothécaire devra valider votre réservation.'
+        );
+        if (!confirmed) return;
 
         setIsReserving(true);
 

@@ -89,6 +89,13 @@ const ThesisCard: React.FC<ThesisCardProps> = ({
             return;
         }
 
+        const confirmed = window.confirm(
+            'Voulez-vous vraiment réserver ce mémoire ?\n\n' +
+            'Un bibliothécaire devra valider votre réservation.'
+        );
+
+        if (!confirmed) return;
+
         setIsReserving(true);
 
         try {
