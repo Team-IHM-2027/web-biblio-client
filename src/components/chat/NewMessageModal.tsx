@@ -3,6 +3,7 @@ import { getUserConversation } from '../../services/chatService';
 import { useSafeAuth } from '../../hooks/useSafeAuth';
 import Button from '../ui/Button';
 import { X } from 'lucide-react';
+import { useConfig } from '../../contexts/ConfigContext';
 
 interface NewMessageModalProps {
   isOpen: boolean;
@@ -18,6 +19,8 @@ const NewMessageModal: React.FC<NewMessageModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { currentUser } = useSafeAuth();
+  const { orgSettings } = useConfig();
+  const primaryColor = orgSettings?.Theme?.Primary || '#3b82f6';
 
   const handleStartChat = async () => {
     if (!currentUser?.email || !currentUser?.name) {
@@ -31,16 +34,16 @@ const NewMessageModal: React.FC<NewMessageModalProps> = ({
     try {
       // getUserConversation returns Conversation | null
       const conversation = await getUserConversation(currentUser.email);
-      
+
       // Check if conversation exists and has an id
       if (!conversation) {
         throw new Error('La conversation n\'a pas pu être créée');
       }
-      
+
       if (!conversation.id) {
         throw new Error('ID de conversation manquant');
       }
-      
+
       // Pass the conversation ID string to onMessageSent
       onMessageSent(conversation.id);
       onClose();
@@ -82,7 +85,8 @@ const NewMessageModal: React.FC<NewMessageModalProps> = ({
             onClick={handleStartChat}
             loading={loading}
             fullWidth
-            className="bg-blue-500 hover:bg-blue-600"
+            className="hover:opacity-90 text-white"
+            style={{ backgroundColor: primaryColor, borderColor: primaryColor }}
           >
             Démarrer une conversation
           </Button>

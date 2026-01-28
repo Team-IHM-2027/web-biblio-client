@@ -5,6 +5,7 @@ import { Message } from '../../types/chat';
 import { Check, CheckCheck } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { useConfig } from '../../contexts/ConfigContext';
 
 interface MessageBubbleProps {
 	message: Message;
@@ -12,9 +13,8 @@ interface MessageBubbleProps {
 }
 
 export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isSender }) => {
-	// const bubbleClasses = isSender
-	// 	? 'bg-primary text-white self-end rounded-br-none'
-	// 	: 'bg-secondary-200 text-gray-800 self-start rounded-bl-none';
+	const { orgSettings } = useConfig();
+	const primaryColor = orgSettings?.Theme?.Primary || '#3b82f6';
 
 	const messageDate = message.heure instanceof Timestamp ? message.heure.toDate() :
 		(message.heure as any)?.toDate ? (message.heure as any).toDate() :
@@ -36,11 +36,12 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isSender 
 				{/* Message Bubble */}
 				<div
 					className={`rounded-2xl px-4 py-3 break-words ${isSender
-						? 'bg-blue-500 text-white rounded-br-none'
+						? 'text-white rounded-br-none'
 						: isBot
 							? 'bg-gradient-to-r from-amber-50 to-orange-50 text-gray-800 border border-orange-200 rounded-bl-none'
 							: 'bg-gray-200 text-gray-800 rounded-bl-none'
 						}`}
+					style={{ backgroundColor: isSender ? primaryColor : undefined }}
 				>
 					<p className="text-sm leading-relaxed whitespace-pre-wrap">{message.texte}</p>
 				</div>
@@ -51,7 +52,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isSender 
 					<span>{timeString}</span>
 					{isSender && (
 						message.lu ? (
-							<CheckCheck className="w-3 h-3 text-blue-500" />
+							<CheckCheck className="w-3 h-3" style={{ color: primaryColor }} />
 						) : (
 							<Check className="w-3 h-3 text-gray-400" />
 						)
@@ -63,4 +64,3 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isSender 
 };
 
 export default MessageBubble;
-

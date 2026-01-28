@@ -158,6 +158,7 @@ export interface BiblioUser {
     reservations?: ReservationItem[];
     searchHistory: string[];
     username?: string;
+    documentId?: string; // ID du document Firestore (peut être email ou UID)
 }
 
 // Interfaces pour les formulaires (conservées et mises à jour)

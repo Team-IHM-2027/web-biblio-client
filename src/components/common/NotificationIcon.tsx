@@ -237,127 +237,130 @@ const NotificationIcon: React.FC<Props> = ({ currentUser, maxVisible = 6 }) => {
         title="Notifications"
       >
         <Bell className="w-5 h-5" />
-        {unreadCount > 0 && (
-          <span
-            className="absolute -top-1 -right-1 text-xs text-white rounded-full flex items-center justify-center font-semibold"
-            style={{ backgroundColor: '#ef4444', minWidth: 18, height: 18, padding: '0 4px' }}
-          >
-            {unreadCount > 99 ? '99+' : unreadCount}
-          </span>
-        )}
-      </button>
-
-      {open && (
-        <div
-          className="absolute right-0 mt-2 w-96 max-h-[80vh] overflow-auto bg-white rounded-lg shadow-xl border border-gray-100 z-50"
-          onClick={(ev) => ev.stopPropagation()}
-        >
-          {/* Header */}
-          <div className="sticky top-0 flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-white z-10">
-            <div className="font-semibold text-gray-800">
-              Notifications {unreadCount > 0 && <span className="text-sm text-gray-500">({unreadCount} non lues)</span>}
-            </div>
-            <div className="flex items-center gap-2">
-              {unreadCount > 0 && (
-                <button
-                  onClick={(ev) => { ev.stopPropagation(); markAllAsRead(); }}
-                  className="text-xs text-blue-600 hover:text-blue-800 font-medium"
-                  title="Marquer tout comme lu"
-                >
-                  Marquer tout lu
-                </button>
-              )}
-              <button
-                onClick={() => setOpen(false)}
-                className="p-1 rounded hover:bg-gray-100"
-                title="Fermer"
+            {unreadCount > 0 && (
+              <span
+                className="absolute -top-1 -right-1 text-xs text-white rounded-full flex items-center justify-center font-semibold"
+                style={{ backgroundColor: primaryColor, minWidth: 18, height: 18, padding: '0 4px' }}
               >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-
-          {/* Content */}
-          <div className="p-2">
-            {loading && (
-              <div className="p-4 text-center text-sm text-gray-500">Chargement...</div>
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
             )}
+          </button>
 
-            {!loading && notifications.length === 0 && (
-              <div className="p-4 text-center text-sm text-gray-500">Aucune notification</div>
-            )}
-
-            {!loading && notifications.length > 0 && (
-              <ul className="divide-y divide-gray-100">
-                {notifications.slice(0, maxVisible).map((n) => (
-                  <li
-                    key={n.id}
-                    className={`px-3 py-3 flex items-start gap-3 transition-colors ${n.read ? 'bg-white hover:bg-gray-50' : 'bg-blue-50 hover:bg-blue-100'
-                      }`}
+          {open && (
+            <div
+              className="absolute right-0 mt-2 w-96 max-h-[80vh] overflow-auto bg-white rounded-lg shadow-xl border border-gray-100 z-50"
+              onClick={(ev) => ev.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="sticky top-0 flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-white z-10">
+                <div className="font-semibold text-gray-800">
+                  Notifications {unreadCount > 0 && <span className="text-sm text-gray-500">({unreadCount} non lues)</span>}
+                </div>
+                <div className="flex items-center gap-2">
+                  {unreadCount > 0 && (
+                    <button
+                      onClick={(ev) => { ev.stopPropagation(); markAllAsRead(); }}
+                      className="text-xs font-medium hover:opacity-80 transition-opacity"
+                      style={{ color: primaryColor }}
+                      title="Marquer tout comme lu"
+                    >
+                      Marquer tout lu
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setOpen(false)}
+                    className="p-1 rounded hover:bg-gray-100"
+                    title="Fermer"
                   >
-                    {/* Unread indicator dot */}
-                    {!n.read && (
-                      <div className="mt-2 w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: '#3b82f6' }} />
-                    )}
-
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1">
-                          <div className="text-sm font-semibold text-gray-900">
-                            {n.title || 'Notification'}
-                          </div>
-                          <div className="text-xs text-gray-600 mt-1 line-clamp-2">
-                            {n.message}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between mt-2 gap-2">
-                        <div className="text-xs text-gray-400 whitespace-nowrap">
-                          {getTimeAgo(n.date)}
-                        </div>
-
-                        <div className="flex items-center gap-1">
-                          {!n.read && (
-                            <button
-                              onClick={(ev) => { ev.stopPropagation(); markAsRead(n.id); }}
-                              className="px-2 py-1 text-xs text-blue-600 hover:bg-blue-100 rounded transition-colors"
-                              title="Marquer comme lu"
-                            >
-                              Marquer lu
-                            </button>
-                          )}
-                          <button
-                            onClick={(ev) => deleteNotification(n, ev)}
-                            className="p-1 rounded hover:bg-red-100 text-gray-500 hover:text-red-600 transition-colors"
-                            title="Supprimer"
-                          >
-                            {deletingId === n.id ? (
-                              <span className="text-xs">⏳</span>
-                            ) : (
-                              <X className="w-3 h-3" />
-                            )}
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-
-            {!loading && notifications.length > 0 && (
-              <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-center">
-                <Link
-                  to="/dashboard/notifications"
-                  className="w-full text-center py-2 px-4 text-white rounded-lg transition-all duration-200 text-sm font-medium shadow-sm hover:shadow-md"
-                  style={{ backgroundColor: primaryColor }}
-                  onClick={() => setOpen(false)}
-                >
-                  Voir toutes mes notifications ({notifications.length})
-                </Link>
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
-            )}
+
+              {/* Content */}
+              <div className="p-2">
+                {loading && (
+                  <div className="p-4 text-center text-sm text-gray-500">Chargement...</div>
+                )}
+
+                {!loading && notifications.length === 0 && (
+                  <div className="p-4 text-center text-sm text-gray-500">Aucune notification</div>
+                )}
+
+                {!loading && notifications.length > 0 && (
+                  <ul className="divide-y divide-gray-100">
+                    {notifications.slice(0, maxVisible).map((n) => (
+                      <li
+                        key={n.id}
+                        className={`px-3 py-3 flex items-start gap-3 transition-colors ${n.read ? 'bg-white hover:bg-gray-50' : 'hover:bg-gray-50'
+                          }`}
+                        style={!n.read ? { backgroundColor: `${primaryColor}10` } : undefined}
+                      >
+                        {/* Unread indicator dot */}
+                        {!n.read && (
+                          <div className="mt-2 w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: primaryColor }} />
+                        )}
+
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex-1">
+                              <div className="text-sm font-semibold text-gray-900">
+                                {n.title || 'Notification'}
+                              </div>
+                              <div className="text-xs text-gray-600 mt-1 line-clamp-2">
+                                {n.message}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between mt-2 gap-2">
+                            <div className="text-xs text-gray-400 whitespace-nowrap">
+                              {getTimeAgo(n.date)}
+                            </div>
+
+                            <div className="flex items-center gap-1">
+                              {!n.read && (
+                                <button
+                                  onClick={(ev) => { ev.stopPropagation(); markAsRead(n.id); }}
+                                  className="px-2 py-1 text-xs rounded transition-colors hover:opacity-80"
+                                  style={{ color: primaryColor }}
+                                  title="Marquer comme lu"
+                                >
+                                  Marquer lu
+                                </button>
+                              )}
+                              <button
+                                onClick={(ev) => deleteNotification(n, ev)}
+                                className="p-1 rounded hover:bg-red-100 text-gray-500 hover:text-red-600 transition-colors"
+                                title="Supprimer"
+                              >
+                                {deletingId === n.id ? (
+                                  <span className="text-xs">⏳</span>
+                                ) : (
+                                  <X className="w-3 h-3" />
+                                )}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                {!loading && notifications.length > 0 && (
+                  <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-center">
+                    <Link
+                      to="/dashboard/notifications"
+                      className="w-full text-center py-2 px-4 text-white rounded-lg transition-all duration-200 text-sm font-medium shadow-sm hover:shadow-md hover:opacity-90"
+                      style={{ backgroundColor: primaryColor }}
+                      onClick={() => setOpen(false)}
+                    >
+                      Voir toutes mes notifications ({notifications.length})
+                    </Link>
+                  </div>
+                )}
           </div>
         </div>
       )}

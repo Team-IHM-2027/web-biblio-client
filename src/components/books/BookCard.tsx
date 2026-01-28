@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useConfig } from '../../contexts/ConfigContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { Heart, ShoppingCart, CheckCircle, AlertCircle, User, Building, Package, Clock, Copy } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Timestamp, doc, arrayUnion, writeBatch, increment } from "firebase/firestore";
-import { db, auth } from '../../configs/firebase';
-import { onAuthStateChanged } from 'firebase/auth';
-import { authService } from '../../services/auth/authService';
+import { db } from '../../configs/firebase';
 import { TabEtatEntry, BiblioUser, EtatValue, ReservationEtatValue } from "../../types/auth";
 
 export interface Comment {
@@ -73,10 +72,10 @@ const BookCard: React.FC<BookCardProps> = ({
     className = ""
 }) => {
     const { orgSettings } = useConfig();
+    const { currentUser } = useAuth();
     const [imageError, setImageError] = useState(false);
     console.log('Image error state:', imageError); // Use it to avoid lint
     const [isReserving, setIsReserving] = useState(false);
-    const [currentUser, setCurrentUser] = useState<BiblioUser | null>(null);
     const navigate = useNavigate();
     const primaryColor = orgSettings?.Theme?.Primary || '#ff8c00';
 
@@ -90,23 +89,6 @@ const BookCard: React.FC<BookCardProps> = ({
 
     const effectiveIsReserved = isReserved || localIsReserved;
 
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            if (user && user.emailVerified) {
-                try {
-                    const biblioUser = await authService.getCurrentUser();
-                    setCurrentUser(biblioUser);
-                } catch (error) {
-                    console.error('Erreur récupération utilisateur:', error);
-                    setCurrentUser(null);
-                }
-            } else {
-                setCurrentUser(null);
-            }
-        });
-
-        return () => unsubscribe();
-    }, []);
 
     const handleToggleFavorite = (e: React.MouseEvent) => {
         e.preventDefault();
@@ -203,7 +185,15 @@ const BookCard: React.FC<BookCardProps> = ({
         setIsReserving(true);
 
         try {
-            const userRef = doc(db, "BiblioUser", currentUser.email!);
+            // Utiliser documentId si disponible, sinon email (fallback)
+            const userDocId = currentUser.documentId || currentUser.email;
+            if (!userDocId) {
+                console.error("Impossible de déterminer l'ID du document utilisateur");
+                alert("Erreur: Impossible de déterminer votre identifiant utilisateur.");
+                return;
+            }
+
+            const userRef = doc(db, "BiblioUser", userDocId);
             const bookRef = doc(db, "BiblioBooks", book.id);
 
             const batch = writeBatch(db);

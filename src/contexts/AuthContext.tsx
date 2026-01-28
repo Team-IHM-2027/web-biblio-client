@@ -49,7 +49,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             // Setup real-time listener for user data using the resolved reference
             unsubscribeSnapshot = onSnapshot(userDocRef, (snapshot) => {
               if (snapshot.exists()) {
-                const biblioUser = { ...snapshot.data() as BiblioUser, id: user.uid };
+                // On stocke l'ID du document (email ou UID) pour utilisation future
+                const biblioUser = {
+                  ...snapshot.data() as BiblioUser,
+                  id: user.uid,
+                  documentId: snapshot.id
+                };
 
                 // ⭐ CHECK IF USER IS BLOCKED
                 if (biblioUser.etat === 'bloc') {
