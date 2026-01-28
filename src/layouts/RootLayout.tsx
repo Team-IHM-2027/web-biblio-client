@@ -1,13 +1,16 @@
-// src/layouts/RootLayout.tsx
 import { Outlet, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import Header from '../components/layout/Header.tsx';
 import { ChatAssistant } from '../components/ChatAssistant/ChatAssistant.tsx';
 import { useAuth } from '../contexts/AuthContext.tsx';
+import { useConfig } from '../contexts/ConfigContext.tsx';
 
 const RootLayout = () => {
   const navigate = useNavigate();
   const auth = useAuth(); // Get the auth context
+  const { orgSettings } = useConfig();
+  const primaryColor = orgSettings?.Theme?.Primary || '#2563eb';
+  const secondaryColor = orgSettings?.Theme?.Secondary || '#3b82f6';
 
   // Extract values safely (they will be null if AuthProvider is missing)
   const currentUser = auth?.currentUser || null;
@@ -43,7 +46,8 @@ const RootLayout = () => {
       <ChatAssistant
         position="bottom-right"
         welcomeMessage="Bonjour! Je suis votre assistant de bibliothèque. Comment puis-je vous aider aujourd'hui ?"
-        primaryColor="#2563eb"
+        primaryColor={primaryColor}
+        accentColor={secondaryColor}
       />
     </div>
   );

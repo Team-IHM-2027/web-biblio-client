@@ -20,7 +20,13 @@ export const cancelReservation = async (
     { name, id }: CancelParams
 ) => {
     const batch = writeBatch(db);
-    const userRef = doc(db, "BiblioUser", currentUser.email);
+    // Utiliser documentId si disponible, sinon email
+    const userDocId = currentUser.documentId || currentUser.email;
+    if (!userDocId) {
+        console.error("ID utilisateur manquant pour l'annulation");
+        return;
+    }
+    const userRef = doc(db, "BiblioUser", userDocId);
 
     const updates: Partial<Record<keyof BiblioUser, unknown>> = {};
     let found = false;
@@ -92,7 +98,13 @@ export const cancelReservationByCollection = async (
     { name, collection, id }: CancelParams
 ) => {
     const batch = writeBatch(db);
-    const userRef = doc(db, "BiblioUser", currentUser.email);
+    // Utiliser documentId si disponible, sinon email
+    const userDocId = currentUser.documentId || currentUser.email;
+    if (!userDocId) {
+        console.error("ID utilisateur manquant pour l'annulation");
+        return;
+    }
+    const userRef = doc(db, "BiblioUser", userDocId);
 
     const updates: Partial<Record<keyof BiblioUser, unknown>> = {};
     let found = false;

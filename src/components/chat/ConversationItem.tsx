@@ -1,16 +1,19 @@
-// src/components/chat/ConversationItem.tsx
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import type { Conversation } from '../../types/chat';
 import { isToday, isYesterday, format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { User } from 'lucide-react';
+import { useConfig } from '../../contexts/ConfigContext';
 
 interface ConversationItemProps {
   conversation: Conversation;
 }
 
 export const ConversationItem: React.FC<ConversationItemProps> = ({ conversation }) => {
+  const { orgSettings } = useConfig();
+  const primaryColor = orgSettings?.Theme?.Primary || '#3b82f6';
+
   const formatTime = (timestamp: any) => {
     if (!timestamp) return '';
 
@@ -30,12 +33,19 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({ conversation
   return (
     <NavLink
       to={`/dashboard/messages/${conversation.id}`}
-      className={({ isActive }) => `flex items-center p-3 rounded-lg transition-colors cursor-pointer ${isActive ? 'bg-blue-50 border-r-4 border-blue-500' : 'hover:bg-gray-50'
+      style={({ isActive }) => ({
+        borderRightColor: isActive ? primaryColor : 'transparent',
+        backgroundColor: isActive ? `${primaryColor}10` : undefined, // 10 is approx 6% opacity
+      })}
+      className={({ isActive }) => `flex items-center p-3 rounded-lg transition-colors cursor-pointer ${isActive ? 'border-r-4' : 'hover:bg-gray-50'
         }`}
     >
       <div className="relative mr-3 flex-shrink-0">
-        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
-          <User className="w-6 h-6 text-white" />
+        <div
+          className="w-12 h-12 rounded-full flex items-center justify-center text-white"
+          style={{ backgroundColor: primaryColor }}
+        >
+          <User className="w-6 h-6" />
         </div>
         {/* Badge pour messages non lus */}
         {conversation.unreadByUser && (

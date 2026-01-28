@@ -39,7 +39,11 @@ export class ReservationService {
             }
 
             // Trouver un slot disponible (vous avez seulement etat1-3)
-            const userRef = doc(db, this.userCollection, currentUser.email);
+            // Utiliser documentId si disponible, sinon email
+            const userDocId = currentUser.documentId || currentUser.email;
+            if (!userDocId) throw new Error("ID utilisateur manquant");
+
+            const userRef = doc(db, this.userCollection, userDocId);
             const userSnap = await getDoc(userRef);
 
             let availableSlot = null;
@@ -273,7 +277,11 @@ export class ReservationService {
             const thesisTitle = thesisData.theme || thesisData.name || 'Mémoire sans titre';
 
             // Trouver un slot disponible
-            const userRef = doc(db, this.userCollection, currentUser.email);
+            // Utiliser documentId si disponible, sinon email
+            const userDocId = currentUser.documentId || currentUser.email;
+            if (!userDocId) throw new Error("ID utilisateur manquant");
+
+            const userRef = doc(db, this.userCollection, userDocId);
             const userSnap = await getDoc(userRef);
 
             let availableSlot = null;

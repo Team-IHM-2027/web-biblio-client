@@ -7,6 +7,7 @@ import { MessageSquare, Menu, X, Search } from 'lucide-react';
 import { Timestamp } from 'firebase/firestore';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import type { Conversation } from '../../types/chat';
+import { useConfig } from '../../contexts/ConfigContext';
 
 const MessagesPage: React.FC = () => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -17,6 +18,8 @@ const MessagesPage: React.FC = () => {
   const { conversationId } = useParams<{ conversationId?: string }>();
   const navigate = useNavigate();
   const location = useLocation();
+  const { orgSettings } = useConfig();
+  const primaryColor = orgSettings?.Theme?.Primary || '#3b82f6';
 
   useEffect(() => {
     if (authLoading) return;
@@ -100,7 +103,7 @@ const MessagesPage: React.FC = () => {
         <div className="p-6 border-b border-gray-50">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center">
-              <MessageSquare className="text-blue-500 mr-3" size={24} />
+              <MessageSquare className="mr-3" size={24} style={{ color: primaryColor }} />
               <h1 className="text-xl font-bold text-gray-800">Messages</h1>
             </div>
           </div>
@@ -109,7 +112,8 @@ const MessagesPage: React.FC = () => {
             <input
               type="text"
               placeholder="Rechercher..."
-              className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+              className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:border-transparent outline-none transition-all"
+              style={{ '--tw-ring-color': primaryColor } as React.CSSProperties}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -138,7 +142,8 @@ const MessagesPage: React.FC = () => {
               <p className="text-xs text-gray-400 mt-1">Commencez à discuter avec l'équipe de la bibliothèque.</p>
               <button
                 onClick={() => navigate(`/dashboard/messages/${currentUser?.email}`)}
-                className="mt-6 px-6 py-2.5 bg-blue-500 text-white font-semibold rounded-xl hover:bg-blue-600 transition-all shadow-md active:scale-95"
+                className="mt-6 px-6 py-2.5 text-white font-semibold rounded-xl transition-all shadow-md active:scale-95 hover:opacity-90"
+                style={{ backgroundColor: primaryColor }}
               >
                 Discuter maintenant
               </button>
@@ -153,8 +158,8 @@ const MessagesPage: React.FC = () => {
           <Outlet />
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-gray-50/30">
-            <div className="w-20 h-20 bg-blue-50 rounded-2xl flex items-center justify-center mb-6">
-              <MessageSquare className="text-blue-500" size={32} />
+            <div className="w-20 h-20 rounded-2xl flex items-center justify-center mb-6" style={{ backgroundColor: `${primaryColor}10` }}>
+              <MessageSquare size={32} style={{ color: primaryColor }} />
             </div>
             <h2 className="text-2xl font-bold text-gray-800 mb-2">
               Vos Conversations

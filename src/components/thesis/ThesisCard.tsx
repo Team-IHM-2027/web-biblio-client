@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useConfig } from '../../contexts/ConfigContext';
+import { useAuth } from '../../contexts/AuthContext';
 import {
     Heart,
     GraduationCap,
@@ -14,7 +15,6 @@ import { BiblioThesis } from '../../types/thesis';
 import { doc, writeBatch, Timestamp, arrayUnion } from 'firebase/firestore';
 import { db } from '../../configs/firebase';
 import { BiblioUser, TabEtatEntry, EtatValue, ReservationEtatValue } from '../../types/auth';
-import { authService } from '../../services/auth/authService';
 
 export type ViewMode = 'grid' | 'list';
 
@@ -45,10 +45,10 @@ const ThesisCard: React.FC<ThesisCardProps> = ({
     className = ""
 }) => {
     const { orgSettings } = useConfig();
+    const { currentUser } = useAuth();
     const [imageError, setImageError] = useState(false);
     const [isReserving, setIsReserving] = useState(false);
-    const [currentUser, setCurrentUser] = useState<BiblioUser | null>(null);
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const isAuthenticated = !!currentUser;
     const navigate = useNavigate();
     const primaryColor = orgSettings?.Theme?.Primary || '#ff8c00';
 
@@ -60,22 +60,6 @@ const ThesisCard: React.FC<ThesisCardProps> = ({
         currentUser.tabEtat5?.[0] === thesis.id
     );
 
-    // Vérifier l'authentification au montage et lors des changements
-    useEffect(() => {
-        const checkAuth = async () => {
-            try {
-                const user = await authService.getCurrentUser();
-                setCurrentUser(user);
-                setIsAuthenticated(!!user);
-            } catch (error) {
-                console.error('Erreur vérification auth:', error);
-                setCurrentUser(null);
-                setIsAuthenticated(false);
-            }
-        };
-
-        checkAuth();
-    }, []);
 
     // Gérer la réservation
     const handleReserve = async () => {
@@ -99,7 +83,15 @@ const ThesisCard: React.FC<ThesisCardProps> = ({
         setIsReserving(true);
 
         try {
-            const userRef = doc(db, "BiblioUser", currentUser.email!);
+            // Utiliser documentId si disponible, sinon email
+            const userDocId = currentUser.documentId || currentUser.email;
+            if (!userDocId) {
+                alert("Erreur: Impossible de déterminer votre identifiant utilisateur.");
+                setIsReserving(false);
+                return;
+            }
+
+            const userRef = doc(db, "BiblioUser", userDocId);
             const batch = writeBatch(db);
             const max = orgSettings?.MaximumSimultaneousLoans || 5;
 

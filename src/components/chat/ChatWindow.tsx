@@ -9,6 +9,7 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import type { SharedMessage, Message } from '../../types/chat';
 import { isSameDay, format, isToday, isYesterday } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { useConfig } from '../../contexts/ConfigContext';
 
 // Helper function for date segmentation
 const getMessagesWithDateDividers = (
@@ -53,6 +54,9 @@ export const ChatWindow: React.FC = () => {
   const [sendError, setSendError] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const { orgSettings } = useConfig();
+  const primaryColor = orgSettings?.Theme?.Primary || '#3b82f6';
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -177,7 +181,8 @@ export const ChatWindow: React.FC = () => {
               }}
               onKeyPress={handleKeyPress}
               placeholder="Tapez votre message..."
-              className="flex-1 min-h-[44px] max-h-[120px] px-4 py-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="flex-1 min-h-[44px] max-h-[120px] px-4 py-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:border-transparent"
+              style={{ '--tw-ring-color': primaryColor } as React.CSSProperties}
               rows={1}
               disabled={isSending}
             />
@@ -186,9 +191,10 @@ export const ChatWindow: React.FC = () => {
               type="submit"
               disabled={!newMessage.trim() || isSending}
               className={`p-3 rounded-lg transition-all ${newMessage.trim() && !isSending
-                ? 'bg-blue-500 hover:bg-blue-600 text-white'
+                ? 'text-white hover:opacity-90'
                 : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                 }`}
+              style={newMessage.trim() && !isSending ? { backgroundColor: primaryColor } : undefined}
             >
               {isSending ? (
                 <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
